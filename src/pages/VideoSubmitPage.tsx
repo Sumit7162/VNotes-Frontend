@@ -1,35 +1,164 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { videosApi } from "../services/videos";
 import { useUsage } from "../hooks/useUsage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { Link, useNavigate } from "react-router-dom";
-import { Video, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
+import {
+  Video,
+  AlertCircle,
+  CheckCircle,
+  ArrowLeft,
+  FileText,
+  Upload,
+  Sparkles,
+  X,
+} from "lucide-react";
+
+type Mode = "youtube" | "transcript";
+
+// Kept in step with MAX_TRANSCRIPT_CHARS on the backend so an oversized paste
+// is caught here instead of after an upload round trip.
+const MAX_TRANSCRIPT_CHARS = 600_000;
+const MIN_TRANSCRIPT_CHARS = 200;
+const ACCEPTED_EXTENSIONS = [".txt", ".text", ".md", ".srt", ".vtt"];
+
+/** Pull the API's `detail` out of an axios error, which otherwise surfaces as
+ *  "Request failed with status code 429" and tells the user nothing. */
+function errorMessage(error: unknown, fallback: string): string {
+  const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+  if (typeof detail === "string" && detail.trim()) return detail;
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
+}
 
 export function VideoSubmitPage() {
+  const [mode, setMode] = useState<Mode>("youtube");
   const [url, setUrl] = useState("");
+  const [transcript, setTranscript] = useState("");
+  const [transcriptTitle, setTranscriptTitle] = useState("");
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: usageData } = useUsage();
 
+  const onSubmitted = () => {
+    queryClient.invalidateQueries({ queryKey: ["videos"] });
+    queryClient.invalidateQueries({ queryKey: ["usage"] });
+    navigate("/dashboard");
+  };
+
   const processMutation = useMutation({
     mutationFn: videosApi.process,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["videos"] });
-      queryClient.invalidateQueries({ queryKey: ["usage"] });
-      navigate("/dashboard");
-    },
+    onSuccess: onSubmitted,
   });
+
+  const transcriptMutation = useMutation({
+    mutationFn: videosApi.processTranscript,
+    onSuccess: onSubmitted,
+  });
+
+  const activeMutation = mode === "youtube" ? processMutation : transcriptMutation;
+
+  const switchMode = (next: Mode) => {
+    if (next === mode) return;
+    setMode(next);
+    setFileError(null);
+    // Clear the other tab's failed attempt so its error does not hang around
+    // over a form the user has moved on from.
+    processMutation.reset();
+    transcriptMutation.reset();
+  };
+
+  const readFile = (file: File) => {
+    setFileError(null);
+
+    const lower = file.name.toLowerCase();
+    if (!ACCEPTED_EXTENSIONS.some((ext) => lower.endsWith(ext))) {
+      setFileError(`Unsupported file type. Use ${ACCEPTED_EXTENSIONS.join(", ")}.`);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => setFileError("Could not read that file. Try pasting the text instead.");
+    reader.onload = () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      if (text.length > MAX_TRANSCRIPT_CHARS) {
+        setFileError(
+          `That file is ${text.length.toLocaleString()} characters, over the ${MAX_TRANSCRIPT_CHARS.toLocaleString()} limit. Split it into parts.`
+        );
+        return;
+      }
+      setTranscript(text);
+      setFileName(file.name);
+      // A file gives us a better default title than "Uploaded Transcript".
+      if (!transcriptTitle.trim()) {
+        setTranscriptTitle(file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim());
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) readFile(file);
+  };
+
+  const clearTranscript = () => {
+    setTranscript("");
+    setFileName(null);
+    setFileError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url.trim()) return;
-    processMutation.mutate({ youtube_url: url.trim() });
+
+    if (mode === "youtube") {
+      if (!url.trim()) return;
+      processMutation.mutate({ youtube_url: url.trim() });
+      return;
+    }
+
+    const text = transcript.trim();
+    if (text.length < MIN_TRANSCRIPT_CHARS) {
+      setFileError(
+        `The transcript needs at least ${MIN_TRANSCRIPT_CHARS} characters — this one has ${text.length}.`
+      );
+      return;
+    }
+    setFileError(null);
+    transcriptMutation.mutate({
+      transcript: text,
+      title: transcriptTitle.trim() || undefined,
+    });
   };
 
   const remainingLong = usageData?.today?.remaining_videos ?? 2;
   const remainingShort = usageData?.today?.remaining_short_videos ?? 10;
   const maxDuration = usageData?.today?.max_duration_minutes ?? 30;
+
+  const transcriptChars = transcript.trim().length;
+  const transcriptWords = transcript.trim() ? transcript.trim().split(/\s+/).length : 0;
+  // Same 150 words-per-minute estimate the backend charges usage against, so
+  // the length shown here matches the one the limits are applied to.
+  const estimatedMinutes = Math.round(transcriptWords / 150);
+
+  const canSubmit =
+    mode === "youtube" ? url.trim().length > 0 : transcriptChars >= MIN_TRANSCRIPT_CHARS;
+
+  const tabClass = (tab: Mode) =>
+    `flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+      mode === tab
+        ? "bg-paper-50 text-accent-700 shadow-sm ring-1 ring-inset ring-accent-200"
+        : "text-ink-500 hover:text-ink-700"
+    }`;
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
@@ -41,69 +170,215 @@ export function VideoSubmitPage() {
           <ArrowLeft className="h-4 w-4" />
           Back to Dashboard
         </Link>
-        <h2 className="font-display text-2xl font-semibold text-ink-900 tracking-tight">Process a Video</h2>
+        <h2 className="font-display text-2xl font-semibold text-ink-900 tracking-tight">
+          Make Notes
+        </h2>
         <p className="text-sm text-ink-500 mt-1">
-          Paste a YouTube URL to generate AI-powered notes
+          Start from a YouTube link, or bring your own transcript
         </p>
       </div>
 
       <div className="bg-paper-50 rounded-xl border border-line p-6">
+        {/* Two ways in, one pipeline: either we fetch the transcript for a URL,
+            or the user hands us one directly. */}
+        <div className="flex gap-1 p-1 bg-paper-100 rounded-xl mb-6" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "youtube"}
+            onClick={() => switchMode("youtube")}
+            className={tabClass("youtube")}
+          >
+            <Video className="h-4 w-4" />
+            YouTube URL
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "transcript"}
+            onClick={() => switchMode("transcript")}
+            className={tabClass("transcript")}
+          >
+            <FileText className="h-4 w-4" />
+            Upload Transcript
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="youtube-url" className="block text-sm font-medium text-ink-700 mb-2">
-              YouTube URL
-            </label>
-            <input
-              id="youtube-url"
-              type="url"
-              placeholder="https://www.youtube.com/watch?v=..."
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="w-full px-4 py-3 border border-line-strong rounded-lg text-sm focus:ring-2 focus:ring-accent-300 focus:border-accent outline-none transition-colors"
-              disabled={processMutation.isPending}
-            />
-          </div>
+          {mode === "youtube" ? (
+            <div>
+              <label htmlFor="youtube-url" className="block text-sm font-medium text-ink-700 mb-2">
+                YouTube URL
+              </label>
+              <input
+                id="youtube-url"
+                type="url"
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="w-full px-4 py-3 border border-line-strong rounded-lg text-sm focus:ring-2 focus:ring-accent-300 focus:border-accent outline-none transition-colors"
+                disabled={processMutation.isPending}
+              />
+              <p className="text-xs text-ink-400 mt-2">
+                We fetch the transcript for you, then write the notes.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label
+                  htmlFor="transcript-title"
+                  className="block text-sm font-medium text-ink-700 mb-2"
+                >
+                  Title <span className="font-normal text-ink-400">(optional)</span>
+                </label>
+                <input
+                  id="transcript-title"
+                  type="text"
+                  placeholder="Lecture 4 — Distributed Consensus"
+                  value={transcriptTitle}
+                  onChange={(e) => setTranscriptTitle(e.target.value)}
+                  maxLength={200}
+                  className="w-full px-4 py-3 border border-line-strong rounded-lg text-sm focus:ring-2 focus:ring-accent-300 focus:border-accent outline-none transition-colors"
+                  disabled={transcriptMutation.isPending}
+                />
+              </div>
+
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+                className={`rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${
+                  isDragging ? "border-accent bg-accent-50" : "border-line-strong bg-paper-100"
+                }`}
+              >
+                <Upload className="h-6 w-6 text-accent-500 mx-auto mb-2" />
+                <p className="text-sm text-ink-600">
+                  Drop a transcript file here, or{" "}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-accent-600 hover:text-accent-800 font-medium underline underline-offset-2"
+                  >
+                    browse
+                  </button>
+                </p>
+                <p className="text-xs text-ink-400 mt-1">
+                  .txt, .md, .srt or .vtt — caption timings are stripped automatically
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ACCEPTED_EXTENSIONS.join(",")}
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) readFile(file);
+                  }}
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label
+                    htmlFor="transcript-text"
+                    className="block text-sm font-medium text-ink-700"
+                  >
+                    Transcript
+                  </label>
+                  {transcript && (
+                    <button
+                      type="button"
+                      onClick={clearTranscript}
+                      className="inline-flex items-center gap-1 text-xs text-ink-500 hover:text-ink-700"
+                    >
+                      <X className="h-3 w-3" />
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  id="transcript-text"
+                  rows={10}
+                  placeholder="Paste your transcript here, or drop a file above..."
+                  value={transcript}
+                  onChange={(e) => {
+                    setTranscript(e.target.value);
+                    setFileName(null);
+                    setFileError(null);
+                  }}
+                  className="w-full px-4 py-3 border border-line-strong rounded-lg text-sm font-mono leading-relaxed focus:ring-2 focus:ring-accent-300 focus:border-accent outline-none transition-colors resize-y"
+                  disabled={transcriptMutation.isPending}
+                />
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-400 mt-2">
+                  {fileName && (
+                    <span className="inline-flex items-center gap-1 text-accent-700">
+                      <FileText className="h-3 w-3" />
+                      {fileName}
+                    </span>
+                  )}
+                  <span>{transcriptWords.toLocaleString()} words</span>
+                  {transcriptWords > 0 && <span>≈ {estimatedMinutes} min of speech</span>}
+                </div>
+              </div>
+            </>
+          )}
 
           <button
             type="submit"
-            disabled={!url.trim() || processMutation.isPending}
+            disabled={!canSubmit || activeMutation.isPending}
             className="w-full flex items-center justify-center gap-2 bg-accent hover:bg-accent-700 disabled:bg-ink-300 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors"
           >
-            {processMutation.isPending ? (
+            {activeMutation.isPending ? (
               <>
                 <LoadingSpinner message="" />
                 Processing...
               </>
             ) : (
               <>
-                <Video className="h-4 w-4" />
-                Process Video
+                <Sparkles className="h-4 w-4" />
+                {mode === "youtube" ? "Process Video" : "Generate Notes"}
               </>
             )}
           </button>
         </form>
 
-        {processMutation.isError && (
+        {fileError && (
+          <div className="mt-4 p-3 bg-danger-50 border border-danger-200 rounded-lg flex items-start gap-2">
+            <AlertCircle className="h-5 w-5 text-danger-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-danger-700">{fileError}</p>
+          </div>
+        )}
+
+        {activeMutation.isError && (
           <div className="mt-4 p-3 bg-danger-50 border border-danger-200 rounded-lg flex items-start gap-2">
             <AlertCircle className="h-5 w-5 text-danger-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-danger-800">Error</p>
               <p className="text-xs text-danger-600 mt-1">
-                {processMutation.error instanceof Error
-                  ? processMutation.error.message
-                  : "Failed to process video. Please try again."}
+                {errorMessage(
+                  activeMutation.error,
+                  mode === "youtube"
+                    ? "Failed to process video. Please try again."
+                    : "Failed to process transcript. Please try again."
+                )}
               </p>
             </div>
           </div>
         )}
 
-        {processMutation.isSuccess && (
+        {activeMutation.isSuccess && (
           <div className="mt-4 p-3 bg-success-50 border border-success-200 rounded-lg flex items-start gap-2">
             <CheckCircle className="h-5 w-5 text-success-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-success-700">Video Submitted!</p>
+              <p className="text-sm font-medium text-success-700">
+                {mode === "youtube" ? "Video Submitted!" : "Transcript Submitted!"}
+              </p>
               <p className="text-xs text-success-600 mt-1">
-                Your video is being processed. You can track progress on the dashboard.
+                Your notes are being generated. You can track progress on the dashboard.
               </p>
             </div>
           </div>
@@ -132,6 +407,10 @@ export function VideoSubmitPage() {
             </span>
           </div>
         </div>
+        <p className="text-xs text-ink-400 mt-3">
+          Uploaded transcripts draw on the same daily allowance; their length is estimated from
+          the word count at 150 words per minute.
+        </p>
       </div>
     </div>
   );

@@ -20,9 +20,15 @@ export type VideoStatus =
   | "downloading"
   | "extracting_audio";
 
+// Where a record's transcript came from: a URL we fetched it for, or a
+// transcript the user uploaded or pasted themselves.
+export type VideoSource = "youtube" | "transcript";
+
 export interface Video {
   id: string;
-  youtube_url: string;
+  /** Null for uploaded transcripts, which have no source URL. */
+  youtube_url: string | null;
+  source: VideoSource;
   title: string | null;
   duration_seconds: number | null;
   status: VideoStatus;
@@ -79,4 +85,10 @@ export interface UsageSummary {
 
 export interface VideoProcessRequest {
   youtube_url: string;
+}
+
+export interface TranscriptProcessRequest {
+  /** Raw transcript text; .srt/.vtt scaffolding is stripped server-side. */
+  transcript: string;
+  title?: string;
 }

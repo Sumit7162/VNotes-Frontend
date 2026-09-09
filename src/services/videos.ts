@@ -1,9 +1,19 @@
 import api from "./api";
-import type { Video, VideoListResponse, VideoProcessRequest } from "../types";
+import type {
+  TranscriptProcessRequest,
+  Video,
+  VideoListResponse,
+  VideoProcessRequest,
+} from "../types";
 
 export const videosApi = {
   process: async (data: VideoProcessRequest): Promise<Video> => {
     const response = await api.post("/api/videos/process", data);
+    return response.data;
+  },
+
+  processTranscript: async (data: TranscriptProcessRequest): Promise<Video> => {
+    const response = await api.post("/api/videos/process-transcript", data);
     return response.data;
   },
 

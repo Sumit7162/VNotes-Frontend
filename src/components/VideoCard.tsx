@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Video, Clock, CheckCircle, AlertCircle, Loader2, Trash2 } from "lucide-react";
+import { Video, Clock, CheckCircle, AlertCircle, Loader2, Trash2, FileText } from "lucide-react";
 import type { Video as VideoType } from "../types";
 import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -62,6 +62,11 @@ const processingSteps = [
   { status: "completed", label: "Done" },
 ];
 
+// An uploaded transcript never passes through a fetch stage - the text is
+// already here - so its progress bar drops that step rather than showing one
+// that can never light up.
+const transcriptSteps = processingSteps.filter((step) => step.status !== "transcribing");
+
 // "10:00" next to a "9:27 AM" timestamp reads as a second clock time, so a
 // duration is always spelled out with its units.
 function formatDuration(seconds: number | null): string | null {
@@ -91,12 +96,14 @@ export function VideoCard({ video }: VideoCardProps) {
   });
 
   const status = statusConfig[video.status] || statusConfig.pending;
+  const isUpload = video.source === "transcript";
+  const steps = isUpload ? transcriptSteps : processingSteps;
   const currentStep = Math.max(
     0,
-    processingSteps.findIndex((step) => step.status === video.status)
+    steps.findIndex((step) => step.status === video.status)
   );
   const isActive = video.status !== "completed" && video.status !== "failed";
-  const progress = Math.round((currentStep / (processingSteps.length - 1)) * 100);
+  const progress = Math.round((currentStep / (steps.length - 1)) * 100);
 
   return (
     <>
@@ -104,14 +111,18 @@ export function VideoCard({ video }: VideoCardProps) {
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
             <div className="flex-shrink-0 w-10 h-10 bg-accent-50 ring-1 ring-inset ring-accent-100 rounded-xl flex items-center justify-center">
-              <Video className="h-5 w-5 text-accent-600" />
+              {isUpload ? (
+                <FileText className="h-5 w-5 text-accent-600" />
+              ) : (
+                <Video className="h-5 w-5 text-accent-600" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-semibold text-ink-900 truncate">
                 {video.title || "Processing..."}
               </h3>
               <p className="text-xs text-ink-500 truncate mt-0.5">
-                {video.youtube_url}
+                {video.youtube_url || "Uploaded transcript"}
               </p>
               <div className="flex items-center gap-3 mt-2 flex-wrap">
                 <span
@@ -143,13 +154,13 @@ export function VideoCard({ video }: VideoCardProps) {
                     />
                   </div>
                   <div className="mt-2 flex justify-between text-[11px] font-medium text-ink-400">
-                    {processingSteps.map((step, index) => {
+                    {steps.map((step, index) => {
                       const isCurrent = index === currentStep;
                       const isDone = index < currentStep;
 
                       let alignmentClass = "text-center flex-1";
                       if (index === 0) alignmentClass = "text-left flex-1";
-                      else if (index === processingSteps.length - 1) alignmentClass = "text-right flex-1";
+                      else if (index === steps.length - 1) alignmentClass = "text-right flex-1";
 
                       return (
                         <span

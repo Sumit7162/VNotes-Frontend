@@ -147,14 +147,17 @@ export function NotesViewerPage() {
                 <Download className="h-4 w-4" />
                 Download MD
               </button>
-              <a
-                href={video?.youtube_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-accent-600 hover:text-accent-800 font-medium"
-              >
-                Watch Video
-              </a>
+              {/* Notes made from an uploaded transcript have nothing to link to. */}
+              {video?.youtube_url && (
+                <a
+                  href={video.youtube_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-accent-600 hover:text-accent-800 font-medium"
+                >
+                  Watch Video
+                </a>
+              )}
             </div>
           </div>
         </div>
