@@ -17,9 +17,10 @@ import {
 
 type Mode = "youtube" | "transcript";
 
-// Kept in step with MAX_TRANSCRIPT_CHARS on the backend so an oversized paste
-// is caught here instead of after an upload round trip.
-const MAX_TRANSCRIPT_CHARS = 600_000;
+// There is no limit on how long an uploaded transcript may be. This matches
+// the backend's sanity ceiling on the request body - set well past any real
+// transcript - so a runaway paste is caught here rather than over the wire.
+const MAX_TRANSCRIPT_CHARS = 2_000_000;
 const MIN_TRANSCRIPT_CHARS = 200;
 const ACCEPTED_EXTENSIONS = [".txt", ".text", ".md", ".srt", ".vtt"];
 
@@ -146,8 +147,8 @@ export function VideoSubmitPage() {
 
   const transcriptChars = transcript.trim().length;
   const transcriptWords = transcript.trim() ? transcript.trim().split(/\s+/).length : 0;
-  // Same 150 words-per-minute estimate the backend charges usage against, so
-  // the length shown here matches the one the limits are applied to.
+  // Shown so the user can see roughly how much material they are handing over.
+  // Nothing is rationed against it - uploads are unlimited.
   const estimatedMinutes = Math.round(transcriptWords / 150);
 
   const canSubmit =
@@ -268,6 +269,9 @@ export function VideoSubmitPage() {
                 </p>
                 <p className="text-xs text-ink-400 mt-1">
                   .txt, .md, .srt or .vtt — caption timings are stripped automatically
+                </p>
+                <p className="text-xs text-accent-600 mt-1">
+                  No length limit, and uploads don't use your daily quota
                 </p>
                 <input
                   ref={fileInputRef}
@@ -408,8 +412,8 @@ export function VideoSubmitPage() {
           </div>
         </div>
         <p className="text-xs text-ink-400 mt-3">
-          Uploaded transcripts draw on the same daily allowance; their length is estimated from
-          the word count at 150 words per minute.
+          These apply to YouTube links only. Uploaded transcripts are unlimited — any length, any
+          number, and they don't count against the daily allowance.
         </p>
       </div>
     </div>
