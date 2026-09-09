@@ -231,7 +231,7 @@ export function VideoSubmitPage() {
                   htmlFor="transcript-title"
                   className="block text-sm font-medium text-ink-700 mb-2"
                 >
-                  Title <span className="font-normal text-ink-400">(optional)</span>
+                  Topic <span className="font-normal text-ink-400">(optional)</span>
                 </label>
                 <input
                   id="transcript-title"
@@ -243,6 +243,14 @@ export function VideoSubmitPage() {
                   className="w-full px-4 py-3 border border-line-strong rounded-lg text-sm focus:ring-2 focus:ring-accent-300 focus:border-accent outline-none transition-colors"
                   disabled={transcriptMutation.isPending}
                 />
+                {/* An uploaded transcript carries no title of its own, so this
+                    is the only thing naming the notes - and the exported PDF
+                    and .md take their filename from it. It also reaches the
+                    model, which writes better notes when it knows the subject. */}
+                <p className="text-xs text-ink-400 mt-2">
+                  Names the notes and the PDF you export, and tells the AI what the transcript is
+                  about. Leave it blank and the notes are filed as "Uploaded Transcript".
+                </p>
               </div>
 
               <div

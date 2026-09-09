@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useNotesForVideo } from "../hooks/useNotes";
 import { useVideo } from "../hooks/useVideos";
@@ -5,6 +6,16 @@ import { NotesMarkdown } from "../components/NotesMarkdown";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { ArrowLeft, FileText, Clock, Download, AlertCircle, Loader2, Printer } from "lucide-react";
 import { formatDateTime } from "../utils/datetime";
+
+/** Strip the characters Windows and macOS refuse in a filename, so a topic
+ *  like "Ch. 3: Trees / Graphs" still downloads instead of failing silently. */
+function safeFileName(title: string | null | undefined): string {
+  return (title || "")
+    .replace(/[\\/:*?"<>|]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+}
 
 const statusLabels: Record<string, string> = {
   pending: "Queued",
@@ -27,6 +38,21 @@ export function NotesViewerPage() {
     isError: notesError,
   } = useNotesForVideo(videoId || null, canLoadNotes);
 
+  // Browsers seed the "Save as PDF" filename from the document title, so while
+  // these notes are on screen the tab carries their title rather than the app
+  // name. That is what makes Export PDF save as "<topic>.pdf" - there is no
+  // other way to name a print, since window.print() takes no filename. The
+  // previous title is restored when the reader navigates away.
+  const pageTitle = video?.title?.trim();
+  useEffect(() => {
+    if (!pageTitle) return;
+    const previous = document.title;
+    document.title = pageTitle;
+    return () => {
+      document.title = previous;
+    };
+  }, [pageTitle]);
+
   const handleDownload = () => {
     if (!note) return;
     // The exported file carries the same footer as the printed page.
@@ -37,7 +63,7 @@ export function NotesViewerPage() {
     const file = new Blob([markdown], { type: "text/markdown" });
     const url = URL.createObjectURL(file);
     element.href = url;
-    element.download = `${video?.title || "notes"}.md`;
+    element.download = `${safeFileName(video?.title) || "notes"}.md`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
