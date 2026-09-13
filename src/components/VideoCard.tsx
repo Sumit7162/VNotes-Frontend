@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Video, Clock, CheckCircle, AlertCircle, Loader2, Trash2, FileText } from "lucide-react";
+import {
+  Video,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  GraduationCap,
+  Loader2,
+  Trash2,
+  FileText,
+} from "lucide-react";
 import type { Video as VideoType } from "../types";
 import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -182,14 +191,28 @@ export function VideoCard({ video }: VideoCardProps) {
               )}
             </div>
           </div>
-          <div className="flex-shrink-0 flex items-center gap-2 self-end sm:self-start">
+          {/* Wraps rather than overflows: three controls is the most this row
+              ever holds, and on a narrow phone they need the second line. */}
+          <div className="flex-shrink-0 flex flex-wrap items-center justify-end gap-2 self-end sm:self-start">
+            {/* Both actions need finished notes: one to read them, one to be
+                tested on them. */}
             {video.status === "completed" && (
-              <Link
-                to={`/notes/${video.id}`}
-                className="text-xs font-medium text-accent-700 hover:text-accent-800 bg-accent-50 hover:bg-accent-100 px-3 py-1.5 rounded-lg transition-colors"
-              >
-                View Notes
-              </Link>
+              <>
+                <Link
+                  to={`/notes/${video.id}`}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-accent-700 hover:text-accent-800 bg-accent-50 hover:bg-accent-100 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  View Notes
+                </Link>
+                <Link
+                  to={`/quiz/${video.id}`}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-accent-700 hover:text-accent-800 bg-accent-50 hover:bg-accent-100 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <GraduationCap className="h-3.5 w-3.5" />
+                  Quiz
+                </Link>
+              </>
             )}
             <button
               onClick={() => setShowConfirm(true)}
