@@ -295,11 +295,16 @@ export function QuizPage() {
                 onClick={() => goTo(index)}
                 aria-label={`Go to question ${index + 1}`}
                 aria-current={isCurrent}
+                // Two signals, two colours: blue is where you are, the same
+                // translucent green as a chosen option means answered.
                 className={`h-7 w-7 rounded-md text-xs font-semibold transition-colors ${
                   isCurrent
                     ? "bg-accent text-white ring-2 ring-accent-200"
                     : isAnswered
-                      ? "bg-accent-100 text-accent-700 hover:bg-accent-200"
+                      // ink rather than a green text colour: the tint behind it
+                      // is translucent, so in the dark theme the square stays
+                      // dark and dark-green digits would disappear into it.
+                      ? "bg-success-600/15 text-ink-900 hover:bg-success-600/25"
                       : "bg-paper-200 text-ink-500 hover:bg-paper-300"
                 }`}
               >
@@ -323,6 +328,10 @@ export function QuizPage() {
           <div className="mt-5 space-y-2.5">
             {question.options.map((option, index) => {
               const isSelected = selected === index;
+              // The chosen option is tinted with a translucent green rather than
+              // a solid one, so it reads as a light wash over the card in the
+              // light theme and as a soft glow - not a glaring block of pastel -
+              // over the dark one.
               return (
                 <button
                   key={index}
@@ -331,13 +340,13 @@ export function QuizPage() {
                   aria-pressed={isSelected}
                   className={`flex w-full items-start gap-3 rounded-xl border p-4 text-left transition-all duration-150 ${
                     isSelected
-                      ? "border-accent bg-accent-50 shadow-sm"
-                      : "border-line bg-paper-50 hover:border-accent-200 hover:bg-paper-100"
+                      ? "border-success-600/50 bg-success-600/15 shadow-sm"
+                      : "border-line bg-paper-50 hover:border-success-600/30 hover:bg-paper-100"
                   }`}
                 >
                   <span
                     className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                      isSelected ? "bg-accent text-white" : "bg-paper-200 text-ink-600"
+                      isSelected ? "bg-success-600 text-white" : "bg-paper-200 text-ink-600"
                     }`}
                   >
                     {isSelected ? <Check className="h-3.5 w-3.5" /> : optionLabel(index)}
