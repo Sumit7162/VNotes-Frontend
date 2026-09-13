@@ -8,6 +8,9 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { VideoSubmitPage } from "./pages/VideoSubmitPage";
 import { NotesListPage } from "./pages/NotesListPage";
 import { NotesViewerPage } from "./pages/NotesViewerPage";
+import { QuizPage } from "./pages/QuizPage";
+import { QuizDashboardPage } from "./pages/QuizDashboardPage";
+import { QuizAttemptPage } from "./pages/QuizAttemptPage";
 import { ProfilePage } from "./pages/ProfilePage";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -70,6 +73,38 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <NotesViewerPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quiz"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <QuizDashboardPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        {/* Declared before /quiz/:videoId so "attempt" is never mistaken for a
+            video id. */}
+        <Route
+          path="/quiz/attempt/:attemptId"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <QuizAttemptPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quiz/:videoId"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <QuizPage />
               </AppLayout>
             </ProtectedRoute>
           }

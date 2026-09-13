@@ -92,3 +92,95 @@ export interface TranscriptProcessRequest {
   transcript: string;
   title?: string;
 }
+
+// ---------------------------------------------------------------------------
+// Quizzes
+// ---------------------------------------------------------------------------
+
+export type QuizDifficulty = "easy" | "medium" | "hard" | "mixed";
+
+/** A question as the person taking the quiz sees it: no answer key. The
+ *  correct option is only revealed by the grading response. */
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  topic: string | null;
+}
+
+export interface Quiz {
+  id: string;
+  video_id: string;
+  note_id: string;
+  title: string | null;
+  difficulty: QuizDifficulty;
+  question_count: number;
+  model_used: string | null;
+  created_at: string;
+  questions: QuizQuestion[];
+}
+
+export interface QuizGenerateRequest {
+  video_id: string;
+  question_count?: number;
+  difficulty?: QuizDifficulty;
+}
+
+export interface QuizAnswerSubmit {
+  question_id: string;
+  /** Null for a question that was left unanswered. */
+  selected_index: number | null;
+}
+
+export interface QuizSubmitRequest {
+  answers: QuizAnswerSubmit[];
+  duration_seconds?: number;
+}
+
+/** One graded question, returned after submitting and when reviewing. */
+export interface QuizAnswerReview {
+  question_id: string;
+  question: string;
+  options: string[];
+  selected_index: number | null;
+  correct_index: number;
+  is_correct: boolean;
+  explanation: string | null;
+  topic: string | null;
+}
+
+export interface QuizAttemptSummary {
+  id: string;
+  quiz_id: string;
+  video_id: string;
+  title: string | null;
+  total_questions: number;
+  correct_count: number;
+  score_percent: number;
+  duration_seconds: number | null;
+  created_at: string;
+}
+
+export interface QuizAttemptDetail extends QuizAttemptSummary {
+  answers: QuizAnswerReview[];
+}
+
+export interface QuizVideoStat {
+  video_id: string;
+  title: string | null;
+  attempts: number;
+  best_score: number;
+  average_score: number;
+  last_attempt_at: string;
+}
+
+export interface QuizDashboardData {
+  total_attempts: number;
+  total_questions_answered: number;
+  total_correct: number;
+  average_score: number;
+  best_score: number;
+  videos_quizzed: number;
+  recent_attempts: QuizAttemptSummary[];
+  by_video: QuizVideoStat[];
+}

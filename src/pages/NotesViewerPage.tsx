@@ -4,8 +4,18 @@ import { useNotesForVideo } from "../hooks/useNotes";
 import { useVideo } from "../hooks/useVideos";
 import { NotesMarkdown } from "../components/NotesMarkdown";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import { ArrowLeft, FileText, Clock, Download, AlertCircle, Loader2, Printer } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  Clock,
+  Download,
+  AlertCircle,
+  GraduationCap,
+  Loader2,
+  Printer,
+} from "lucide-react";
 import { formatDateTime } from "../utils/datetime";
+import { useQuizAttempts } from "../hooks/useQuiz";
 
 /** Strip the characters Windows and macOS refuse in a filename, so a topic
  *  like "Ch. 3: Trees / Graphs" still downloads instead of failing silently. */
@@ -37,6 +47,10 @@ export function NotesViewerPage() {
     isLoading: notesLoading,
     isError: notesError,
   } = useNotesForVideo(videoId || null, canLoadNotes);
+  // Only used to label the quiz button with how many times these notes have
+  // already been quizzed on; a failure here must not affect the notes.
+  const { data: attempts } = useQuizAttempts(videoId || undefined);
+  const attemptCount = attempts?.length ?? 0;
 
   // Browsers seed the "Save as PDF" filename from the document title, so while
   // these notes are on screen the tab carries their title rather than the app
@@ -159,6 +173,23 @@ export function NotesViewerPage() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-4 print:hidden">
+              {/* The primary action on this page: turn what was just read into
+                  a test of it. Filled, where the exports are quiet links. */}
+              <Link
+                to={`/quiz/${videoId}`}
+                className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700"
+              >
+                <GraduationCap className="h-4 w-4" />
+                Give Quiz
+              </Link>
+              {attemptCount > 0 && (
+                <Link
+                  to="/quiz"
+                  className="text-sm font-medium text-accent-600 hover:text-accent-800"
+                >
+                  {attemptCount} past {attemptCount === 1 ? "attempt" : "attempts"}
+                </Link>
+              )}
               <button
                 onClick={handlePrintPdf}
                 className="inline-flex items-center gap-1 text-sm text-ink-600 hover:text-ink-900 font-medium"

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   ChevronDown,
   FileText,
+  GraduationCap,
   LayoutDashboard,
   LogOut,
   Monitor,
@@ -20,6 +21,7 @@ const menuItems = [
   { to: "/dashboard", icon: <LayoutDashboard className="h-4 w-4" />, label: "Dashboard" },
   { to: "/submit", icon: <Upload className="h-4 w-4" />, label: "Process New Video" },
   { to: "/notes", icon: <FileText className="h-4 w-4" />, label: "My Notes" },
+  { to: "/quiz", icon: <GraduationCap className="h-4 w-4" />, label: "Quiz Dashboard" },
   { to: "/profile", icon: <User className="h-4 w-4" />, label: "Profile" },
 ];
 
