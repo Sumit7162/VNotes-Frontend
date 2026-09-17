@@ -1,7 +1,10 @@
 export interface User {
   id: string;
-  google_id: string;
+  /** Null for an account that signs in with an email address and a password. */
+  google_id: string | null;
   email: string;
+  /** False until the verification link has been followed. */
+  email_verified: boolean;
   full_name: string | null;
   avatar_url: string | null;
   plan: string;

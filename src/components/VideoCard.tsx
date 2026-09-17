@@ -203,7 +203,7 @@ export function VideoCard({ video }: VideoCardProps) {
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-accent-700 hover:text-accent-800 bg-accent-50 hover:bg-accent-100 px-3 py-1.5 rounded-lg transition-colors"
                 >
                   <FileText className="h-3.5 w-3.5" />
-                  View Notes
+                  Notes
                 </Link>
                 <Link
                   to={`/quiz/${video.id}`}

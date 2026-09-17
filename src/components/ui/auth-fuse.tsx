@@ -207,11 +207,19 @@ export interface AuthUIProps {
    */
   googleSlot?: React.ReactNode;
   /**
-   * Email and password forms. Off by default: this app authenticates only
-   * through Google, and a form that silently discards a typed password is
-   * worse than no form at all.
+   * The email-and-password form, rendered above the Google button. This is a
+   * slot rather than a built-in form on purpose: the form has to talk to the
+   * API, and a component that owns the markup but not the submit handler ends
+   * up silently discarding what people type.
    */
-  showEmailForms?: boolean;
+  emailFormSlot?: React.ReactNode;
+  /**
+   * Which side of the form is showing. Only drives the artwork and the
+   * heading - the slot owns the form itself.
+   */
+  mode?: "signin" | "signup";
+  /** Heading used in place of `title` while `mode` is "signup". */
+  signUpTitle?: string;
   /** Optional brand block above the heading. */
   brand?: React.ReactNode;
   /** Rendered under the sign-in options, e.g. an error message. */
@@ -257,55 +265,15 @@ const defaultSignUpContent = {
   },
 };
 
-function SignInForm() {
-  const handleSignIn = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log("UI: Sign In form submitted");
-  };
-  return (
-    <form onSubmit={handleSignIn} autoComplete="on" className="flex flex-col gap-8">
-      <div className="grid gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" />
-        </div>
-        <PasswordInput name="password" label="Password" required autoComplete="current-password" placeholder="Password" />
-        <Button type="submit" variant="outline" className="mt-2">Sign In</Button>
-      </div>
-    </form>
-  );
-}
-
-function SignUpForm() {
-  const handleSignUp = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log("UI: Sign Up form submitted");
-  };
-  return (
-    <form onSubmit={handleSignUp} autoComplete="on" className="flex flex-col gap-8">
-      <div className="grid gap-4">
-        <div className="grid gap-1">
-          <Label htmlFor="name">Full Name</Label>
-          <Input id="name" name="name" type="text" placeholder="John Doe" required autoComplete="name" />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" />
-        </div>
-        <PasswordInput name="password" label="Password" required autoComplete="new-password" placeholder="Password" />
-        <Button type="submit" variant="outline" className="mt-2">Sign Up</Button>
-      </div>
-    </form>
-  );
-}
-
 export function AuthUI({
   signInContent = {},
   signUpContent = {},
   title = "Sign in to your account",
   subtitle = "Continue with Google to get started",
   googleSlot,
-  showEmailForms = false,
+  emailFormSlot,
+  mode = "signin",
+  signUpTitle = "Create an account",
   brand,
   footer,
   asideSlot,
@@ -313,8 +281,7 @@ export function AuthUI({
   formPanelClassName,
   formCardClassName,
 }: AuthUIProps) {
-  const [isSignIn, setIsSignIn] = useState(true);
-  const toggleForm = () => setIsSignIn((prev) => !prev);
+  const isSignIn = mode === "signin";
 
   const finalSignInContent = {
     image: { ...defaultSignInContent.image, ...signInContent.image },
@@ -354,28 +321,23 @@ export function AuthUI({
 
           <div className="flex flex-col items-center gap-2 text-center">
             <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-              {showEmailForms && !isSignIn ? "Create an account" : title}
+              {isSignIn ? title : signUpTitle}
             </h1>
             <p className="text-balance text-sm text-muted-foreground">{subtitle}</p>
           </div>
 
-          {showEmailForms && (isSignIn ? <SignInForm /> : <SignUpForm />)}
+          {emailFormSlot}
 
-          {showEmailForms && (
-            <>
-              <div className="text-center text-sm text-muted-foreground">
-                {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
-                <Button variant="link" className="pl-1 text-foreground" onClick={toggleForm}>
-                  {isSignIn ? "Sign up" : "Sign in"}
-                </Button>
-              </div>
-              <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-                <span className="relative z-10 bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </>
-          )}
+          {emailFormSlot && googleSlot ? (
+            <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+              {/* The label sits on the card, not the page, so it takes the
+                  card's own translucent surface rather than `background`,
+                  which would paint an opaque block over the backdrop. */}
+              <span className="relative z-10 bg-paper-50/90 px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          ) : null}
 
           <div className="flex justify-center">{googleSlot}</div>
 
