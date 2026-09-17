@@ -31,6 +31,9 @@
   --input: #DEE5EE;
   --ring: #2A5FD9;
   --primary: #2A5FD9;
+  /* Darker on a light ground, lighter on a dark one - see html.dark. A solid
+     primary button uses .btn-primary rather than naming either hex itself. */
+  --primary-hover: #1F49AC;
   --primary-foreground: #FFFFFF;
   --secondary: #EDF1F7;
   --secondary-foreground: #202936;
@@ -56,38 +59,55 @@
 
   --line: 222 229 238;
   --line-strong: 201 211 224;
+
+  /* The sidebar reads as the quiet edge of the page: white against the faintly
+     grey ground, rather than another grey panel on grey. */
+  --sidebar: 255 255 255;
+  --sidebar-line: 226 232 241;
 }
 
+/* The dark theme is the primary design reference for the application shell, so
+   its neutrals carry a slight blue cast rather than being pure grey: the page
+   sits at #080D14, the sidebar a step above it at #0D141E, and cards a step
+   above that at #101925. Three surfaces, consistently ordered, is what lets a
+   card read as raised without a shadow doing the work. */
 html.dark {
-  --background: #06070a;
-  --foreground: #F7F9FC;
-  --muted: #141821;
-  --muted-foreground: #97A3B4;
-  --border: #232A36;
-  --input: #232A36;
-  --ring: #6C93F0;
-  --secondary: #141821;
-  --secondary-foreground: #F7F9FC;
+  --background: #080D14;
+  --foreground: #F5F7FA;
+  --muted: #101925;
+  --muted-foreground: #94A3B8;
+  --border: #1D2A3A;
+  --input: #1D2A3A;
+  --ring: #426CE5;
+  --primary: #315FD8;
+  /* Lighter than the base here: on a dark ground a hover has to come forward,
+     and the light theme's darker hover would read as the button switching off. */
+  --primary-hover: #426CE5;
+  --secondary: #172231;
+  --secondary-foreground: #F5F7FA;
 
   /* The ramps invert by role, not by number. paper-100 stays the page and
      paper-50 the card sitting on it, so cards still read as raised - but here
      that means 50 is lighter than 100 rather than pure white. ink keeps 900 as
      the strongest text and 300 as the faintest, which near-inverts its hexes. */
-  --paper-50: 18 24 33;
-  --paper-100: 11 15 21;
-  --paper-200: 26 34 46;
-  --paper-300: 35 44 58;
+  --paper-50: 16 25 37;
+  --paper-100: 8 13 20;
+  --paper-200: 23 34 49;
+  --paper-300: 29 42 58;
 
-  --ink-300: 78 89 104;
-  --ink-400: 107 120 137;
-  --ink-500: 138 151 168;
-  --ink-600: 169 181 196;
-  --ink-700: 198 208 220;
-  --ink-800: 223 230 238;
-  --ink-900: 244 247 251;
+  --ink-300: 71 85 105;
+  --ink-400: 100 116 139;
+  --ink-500: 148 163 184;
+  --ink-600: 179 192 209;
+  --ink-700: 203 213 225;
+  --ink-800: 226 232 240;
+  --ink-900: 245 247 250;
 
-  --line: 34 43 55;
-  --line-strong: 48 59 74;
+  --line: 29 42 58;
+  --line-strong: 42 58 78;
+
+  --sidebar: 13 20 30;
+  --sidebar-line: 29 42 58;
 }
 
 html {
@@ -136,17 +156,17 @@ body {
    over so they do not stay light against a near-black page. */
 html.dark,
 html.dark body {
-  background: #06070a;
-  color: #C7D0DC;
+  background: #080D14;
+  color: #CBD5E1;
   color-scheme: dark;
 }
 
 html.dark ::-webkit-scrollbar-thumb {
-  background: #232A36;
-  border: 3px solid #06070a;
+  background: #1D2A3A;
+  border: 3px solid #080D14;
 }
 html.dark ::-webkit-scrollbar-thumb:hover {
-  background: #3A4453;
+  background: #33455C;
 }
 
 /* Sign-in panel ground. A blue base rather than a near-white one, carrying the
@@ -239,6 +259,91 @@ html.dark .markdown-content a:hover {
 :where(a, button, input, textarea, select):focus-visible {
   outline: 2px solid #2A5FD9;
   outline-offset: 2px;
+}
+
+/* ---- Application shell ------------------------------------------------
+   A handful of component classes so the shell's repeated treatments live in
+   one place rather than as the same long class string copied across files. */
+
+/* Solid primary action. Uses the tokens so the hover goes darker in light and
+   lighter in dark without either hex appearing at a call site. */
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+/* The hero's ground: a restrained indigo-to-blue wash rather than a saturated
+   gradient, with a soft highlight off the top left so the panel has a light
+   source instead of being a flat colour field. Dark enough in both themes to
+   carry white type, which is why it does not swap with the theme. */
+.hero-surface {
+  background:
+    radial-gradient(90% 120% at 0% 0%, rgba(120, 155, 255, 0.28), transparent 60%),
+    radial-gradient(70% 110% at 100% 100%, rgba(18, 32, 82, 0.55), transparent 65%),
+    linear-gradient(120deg, #2D4FB8 0%, #2A5FD9 45%, #3B3592 100%);
+}
+
+/* The faint grid behind the hero illustration. Two hairline gradients rather
+   than an image, so it costs nothing and stays crisp at any zoom. */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Page headings take the serif. Used sparingly - page titles and the hero
+   only - so the editorial note reads as deliberate rather than decorative. */
+.page-title {
+  @apply font-display font-semibold tracking-tight text-ink-900;
+}
+
+/* Sidebar and menu rows. The active row is a tinted block rather than a border
+   or a bar, which is quieter and survives both themes. */
+.nav-row {
+  @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150;
+}
+.nav-row-idle {
+  @apply text-ink-600 hover:bg-paper-200 hover:text-ink-900;
+}
+.nav-row-active {
+  @apply bg-accent-50 text-accent-700;
+}
+html.dark .nav-row-active {
+  background-color: rgba(49, 95, 216, 0.16);
+  color: #A8C0F7;
+}
+
+/* Cards. One treatment, so panels across the app agree on radius and border
+   instead of each page inventing its own. */
+.surface-card {
+  @apply rounded-xl border border-line bg-paper-50;
+}
+
+/* Dropdown entrance. Deliberately short and small: a menu that slides in from
+   far away reads as slow however fast the easing is. */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ---- Notes typography -------------------------------------------------

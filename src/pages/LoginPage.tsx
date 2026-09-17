@@ -1,14 +1,32 @@
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
-import { AuthUI, Button, Input, Label, PasswordInput } from "@/components/ui/auth-fuse";
-import { MatrixRain } from "@/components/ui/matrix-rain";
-import RecursiveErosionBackground from "@/components/ui/recursive-erosion";
+import { Loader2, MailCheck } from "lucide-react";
+
+import { Button, Input, Label, PasswordInput } from "@/components/ui/auth-fuse";
+import { AuthLayout } from "@/components/layout/AuthLayout";
 import { authApi, errorMessage, isUnverifiedError, saveSession } from "@/services/auth";
 
 type Mode = "signin" | "signup" | "forgot";
+
+const copy: Record<Mode, { title: string; subtitle: string; submit: string }> = {
+  signin: {
+    title: "Sign in to V-Notes AI",
+    subtitle: "Use your email and password, or continue with Google.",
+    submit: "Sign in",
+  },
+  signup: {
+    title: "Create your account",
+    subtitle: "Sign up with your email address, or continue with Google.",
+    submit: "Create account",
+  },
+  forgot: {
+    title: "Reset your password",
+    subtitle: "Enter your email address and we will send you a reset link.",
+    submit: "Send reset link",
+  },
+};
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -105,183 +123,66 @@ export function LoginPage() {
     }
   };
 
-  const submitLabel =
-    mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link";
-
-  const emailForm = sentTo ? (
-    <div className="grid gap-4 text-center">
-      <MailCheck className="mx-auto h-10 w-10 text-primary" aria-hidden="true" />
-      <p className="text-sm text-muted-foreground">
-        We sent a verification link to <span className="font-medium text-foreground">{sentTo}</span>.
-        Open it to activate your account — the link works for 24 hours.
-      </p>
-      <Button
-        type="button"
-        variant="outline"
-        disabled={busy}
-        onClick={() => {
-          setEmail(sentTo);
-          handleResend();
-        }}
+  // ---- Post-signup panel --------------------------------------------------
+  if (sentTo) {
+    return (
+      <AuthLayout
+        title="Check your inbox"
+        subtitle="Your account is created but not active yet."
       >
-        Resend the email
-      </Button>
-      <Button
-        type="button"
-        variant="link"
-        onClick={() => {
-          setSentTo("");
-          switchMode("signin");
-        }}
-      >
-        Back to sign in
-      </Button>
-      {notice && <p className="text-xs text-muted-foreground">{notice}</p>}
-    </div>
-  ) : (
-    <form onSubmit={handleSubmit} autoComplete="on" className="grid gap-4">
-      {mode === "signup" && (
-        <div className="grid gap-2">
-          <Label htmlFor="full-name">Full name</Label>
-          <Input
-            id="full-name"
-            name="name"
-            type="text"
-            placeholder="Your name"
-            autoComplete="name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
-        </div>
-      )}
+        <div className="surface-card p-6 text-center">
+          <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
+            <MailCheck className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <p className="mt-4 text-sm leading-relaxed text-ink-600">
+            We sent a verification link to{" "}
+            <span className="font-medium text-ink-900">{sentTo}</span>. Open it to activate
+            your account — the link works for 24 hours.
+          </p>
 
-      <div className="grid gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="you@example.com"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-
-      {mode !== "forgot" && (
-        <PasswordInput
-          name="password"
-          label="Password"
-          required
-          minLength={8}
-          autoComplete={mode === "signup" ? "new-password" : "current-password"}
-          placeholder={mode === "signup" ? "At least 8 characters" : "Password"}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      )}
-
-      {mode === "signup" && (
-        <p className="-mt-1 text-xs text-muted-foreground">
-          At least 8 characters, including a letter and a number.
-        </p>
-      )}
-
-      <Button type="submit" disabled={busy} className="mt-1">
-        {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-        {submitLabel}
-      </Button>
-
-      <div className="flex flex-wrap items-center justify-between gap-1 text-sm text-muted-foreground">
-        {mode === "signin" ? (
-          <>
-            <button
-              type="button"
-              className="text-foreground underline-offset-4 hover:underline"
-              onClick={() => switchMode("signup")}
-            >
-              Create an account
-            </button>
-            <button
-              type="button"
-              className="underline-offset-4 hover:underline"
-              onClick={() => switchMode("forgot")}
-            >
-              Forgot password?
-            </button>
-          </>
-        ) : (
-          <button
+          <Button
             type="button"
-            className="text-foreground underline-offset-4 hover:underline"
-            onClick={() => switchMode("signin")}
+            variant="outline"
+            disabled={busy}
+            className="mt-5 w-full"
+            onClick={() => {
+              setEmail(sentTo);
+              handleResend();
+            }}
           >
-            ← Back to sign in
-          </button>
-        )}
-      </div>
-    </form>
-  );
+            {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+            Resend the email
+          </Button>
+
+          {notice && <p className="mt-3 text-xs text-ink-500">{notice}</p>}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            setSentTo("");
+            switchMode("signin");
+          }}
+          className="mt-5 w-full text-sm text-ink-500 underline-offset-4 transition-colors hover:text-ink-900 hover:underline"
+        >
+          Back to sign in
+        </button>
+      </AuthLayout>
+    );
+  }
+
+  const { title, subtitle, submit } = copy[mode];
 
   return (
-    <AuthUI
-      mode={mode === "signup" ? "signup" : "signin"}
-      asideSlot={<MatrixRain />}
-      // Held back below `sm`, where the card drops its own background and dark
-      // form text would sit straight on the black ground. From sm up the card
-      // is 90% white, so the form reads cleanly over the effect.
-      formBackgroundSlot={
-        <div className="hidden h-full w-full sm:block">
-          <RecursiveErosionBackground mode="dark" />
-        </div>
-      }
-      formPanelClassName="login-surface login-surface-night"
-      // The Google button is a fixed 320px wide, so the card only gains its
-      // padding from sm up, where 420px minus p-8 still clears it. On a phone
-      // it drops the chrome and uses the full width instead of clipping.
-      formCardClassName="w-full max-w-[420px] sm:rounded-2xl sm:border sm:border-line sm:bg-paper-50/90 sm:p-8 sm:shadow-lg"
-      title="Sign in to V-Notes AI"
-      signUpTitle={mode === "forgot" ? "Reset your password" : "Create your account"}
-      subtitle={
-        mode === "forgot"
-          ? "Enter your email address and we will send you a reset link."
-          : mode === "signup"
-            ? "Sign up with your email address, or continue with Google."
-            : "Use your email and password, or continue with Google."
-      }
-      brand={
-        <div className="flex flex-col items-center gap-3">
-          <img
-            src="/logo-tile.png"
-            alt=""
-            width={56}
-            height={56}
-            className="h-14 w-14 rounded-2xl ring-1 ring-border"
-          />
-        </div>
-      }
-      emailFormSlot={emailForm}
-      googleSlot={
-        sentTo ? null : (
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setError("Google Sign-In was unsuccessful.")}
-            useOneTap
-            theme="filled_black"
-            shape="pill"
-            size="large"
-            text="continue_with"
-            width="320"
-          />
-        )
-      }
+    <AuthLayout
+      title={title}
+      subtitle={subtitle}
       footer={
-        <div className="grid gap-3 text-center">
+        <div className="space-y-3">
           {error && (
             <div
               role="alert"
-              className="grid gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+              className="rounded-lg border border-danger-200 bg-danger-50 px-3.5 py-2.5 text-sm text-danger-700"
             >
               <p>{error}</p>
               {needsVerification && (
@@ -289,28 +190,127 @@ export function LoginPage() {
                   type="button"
                   disabled={busy}
                   onClick={handleResend}
-                  className="justify-self-center text-xs font-medium underline underline-offset-4 disabled:opacity-60"
+                  className="mt-1.5 text-xs font-semibold underline underline-offset-4 disabled:opacity-60"
                 >
                   Resend verification email
                 </button>
               )}
             </div>
           )}
-          {notice && !sentTo && (
-            <p className="rounded-lg border border-line bg-paper-100/80 px-3 py-2 text-sm text-ink-700">
+          {notice && (
+            <p className="rounded-lg border border-line bg-paper-200 px-3.5 py-2.5 text-sm text-ink-700">
               {notice}
             </p>
           )}
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to home
-          </Link>
         </div>
       }
-    />
+    >
+      <form onSubmit={handleSubmit} autoComplete="on" className="grid gap-4">
+        {mode === "signup" && (
+          <div className="grid gap-1.5">
+            <Label htmlFor="full-name">Full name</Label>
+            <Input
+              id="full-name"
+              name="name"
+              type="text"
+              placeholder="Your name"
+              autoComplete="name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+          </div>
+        )}
+
+        <div className="grid gap-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        {mode !== "forgot" && (
+          <PasswordInput
+            name="password"
+            label="Password"
+            required
+            minLength={8}
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            placeholder={mode === "signup" ? "At least 8 characters" : "Password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        )}
+
+        {mode === "signup" && (
+          <p className="-mt-1.5 text-xs text-ink-500">
+            At least 8 characters, including a letter and a number.
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={busy}
+          className="btn-primary mt-1 inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+          {submit}
+        </button>
+
+        <div className="flex flex-wrap items-center justify-between gap-1 text-sm text-ink-500">
+          {mode === "signin" ? (
+            <>
+              <button
+                type="button"
+                className="font-medium text-ink-700 underline-offset-4 hover:underline"
+                onClick={() => switchMode("signup")}
+              >
+                Create an account
+              </button>
+              <button
+                type="button"
+                className="underline-offset-4 hover:underline"
+                onClick={() => switchMode("forgot")}
+              >
+                Forgot password?
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="font-medium text-ink-700 underline-offset-4 hover:underline"
+              onClick={() => switchMode("signin")}
+            >
+              ← Back to sign in
+            </button>
+          )}
+        </div>
+      </form>
+
+      <div className="relative my-6 text-center text-xs">
+        <span className="absolute inset-x-0 top-1/2 border-t border-line" aria-hidden="true" />
+        <span className="relative bg-paper-100 px-3 text-ink-400">Or continue with</span>
+      </div>
+
+      <div className="flex justify-center">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => setError("Google Sign-In was unsuccessful.")}
+          useOneTap
+          theme="filled_black"
+          shape="pill"
+          size="large"
+          text="continue_with"
+          width="320"
+        />
+      </div>
+    </AuthLayout>
   );
 }
 

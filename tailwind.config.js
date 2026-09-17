@@ -97,6 +97,14 @@ export default {
           DEFAULT: "rgb(var(--line) / <alpha-value>)",
           strong: "rgb(var(--line-strong) / <alpha-value>)",
         },
+        // The application shell. The sidebar is its own surface rather than
+        // `paper`, because it sits a step apart from both the page behind it
+        // and the cards on it - which is what stops the layout reading as one
+        // undifferentiated sheet.
+        sidebar: {
+          DEFAULT: "rgb(var(--sidebar) / <alpha-value>)",
+          line: "rgb(var(--sidebar-line) / <alpha-value>)",
+        },
         // shadcn token names, backed by the CSS variables in index.css so
         // pasted components work and follow the .dark class with everything
         // else. `accent` is intentionally not among them - see index.css.
@@ -106,7 +114,11 @@ export default {
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
-        primary: { DEFAULT: "var(--primary)", foreground: "var(--primary-foreground)" },
+        primary: {
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
+          hover: "var(--primary-hover)",
+        },
         secondary: { DEFAULT: "var(--secondary)", foreground: "var(--secondary-foreground)" },
         destructive: { DEFAULT: "var(--destructive)", foreground: "var(--destructive-foreground)" },
         success: {

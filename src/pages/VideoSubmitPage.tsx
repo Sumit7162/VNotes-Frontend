@@ -1,9 +1,12 @@
 import { useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { videosApi } from "../services/videos";
 import { useUsage } from "../hooks/useUsage";
+import { submissionErrorMessage, useVideoSubmission } from "../hooks/useVideoSubmission";
+import {
+  YOUTUBE_LOCK_MESSAGE,
+  YOUTUBE_SUBMISSION_LOCKED,
+} from "@/lib/features";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Video,
   AlertCircle,
@@ -12,6 +15,7 @@ import {
   FileText,
   Upload,
   Sparkles,
+  Lock,
   X,
 } from "lucide-react";
 
@@ -24,17 +28,10 @@ const MAX_TRANSCRIPT_CHARS = 2_000_000;
 const MIN_TRANSCRIPT_CHARS = 200;
 const ACCEPTED_EXTENSIONS = [".txt", ".text", ".md", ".srt", ".vtt"];
 
-/** Pull the API's `detail` out of an axios error, which otherwise surfaces as
- *  "Request failed with status code 429" and tells the user nothing. */
-function errorMessage(error: unknown, fallback: string): string {
-  const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
-  if (typeof detail === "string" && detail.trim()) return detail;
-  if (error instanceof Error && error.message) return error.message;
-  return fallback;
-}
-
 export function VideoSubmitPage() {
-  const [mode, setMode] = useState<Mode>("youtube");
+  const [mode, setMode] = useState<Mode>(
+    YOUTUBE_SUBMISSION_LOCKED ? "transcript" : "youtube",
+  );
   const [url, setUrl] = useState("");
   const [transcript, setTranscript] = useState("");
   const [transcriptTitle, setTranscriptTitle] = useState("");
@@ -43,30 +40,14 @@ export function VideoSubmitPage() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const { data: usageData } = useUsage();
-
-  const onSubmitted = () => {
-    queryClient.invalidateQueries({ queryKey: ["videos"] });
-    queryClient.invalidateQueries({ queryKey: ["usage"] });
-    navigate("/dashboard");
-  };
-
-  const processMutation = useMutation({
-    mutationFn: videosApi.process,
-    onSuccess: onSubmitted,
-  });
-
-  const transcriptMutation = useMutation({
-    mutationFn: videosApi.processTranscript,
-    onSuccess: onSubmitted,
-  });
+  const { youtube: processMutation, transcript: transcriptMutation } = useVideoSubmission();
 
   const activeMutation = mode === "youtube" ? processMutation : transcriptMutation;
 
   const switchMode = (next: Mode) => {
     if (next === mode) return;
+    if (next === "youtube" && YOUTUBE_SUBMISSION_LOCKED) return;
     setMode(next);
     setFileError(null);
     // Clear the other tab's failed attempt so its error does not hang around
@@ -175,22 +156,39 @@ export function VideoSubmitPage() {
           Make Notes
         </h2>
         <p className="text-sm text-ink-500 mt-1">
-          Start from a YouTube link, or bring your own transcript
+          {YOUTUBE_SUBMISSION_LOCKED
+            ? "Bring your own transcript and let AI write the notes"
+            : "Start from a YouTube link, or bring your own transcript"}
         </p>
       </div>
 
       <div className="bg-paper-50 rounded-xl border border-line p-6">
         {/* Two ways in, one pipeline: either we fetch the transcript for a URL,
             or the user hands us one directly. */}
+        {YOUTUBE_SUBMISSION_LOCKED && (
+          <p className="mb-4 flex items-start gap-2 rounded-lg border border-line bg-paper-100 px-3.5 py-2.5 text-xs leading-relaxed text-ink-600">
+            <Lock className="mt-px h-3.5 w-3.5 shrink-0 text-ink-400" aria-hidden="true" />
+            {YOUTUBE_LOCK_MESSAGE}
+          </p>
+        )}
+
         <div className="flex gap-1 p-1 bg-paper-100 rounded-xl mb-6" role="tablist">
           <button
             type="button"
             role="tab"
             aria-selected={mode === "youtube"}
             onClick={() => switchMode("youtube")}
-            className={tabClass("youtube")}
+            disabled={YOUTUBE_SUBMISSION_LOCKED}
+            title={YOUTUBE_SUBMISSION_LOCKED ? YOUTUBE_LOCK_MESSAGE : undefined}
+            className={`${tabClass("youtube")} ${
+              YOUTUBE_SUBMISSION_LOCKED ? "cursor-not-allowed opacity-50" : ""
+            }`}
           >
-            <Video className="h-4 w-4" />
+            {YOUTUBE_SUBMISSION_LOCKED ? (
+              <Lock className="h-4 w-4" />
+            ) : (
+              <Video className="h-4 w-4" />
+            )}
             YouTube URL
           </button>
           <button
@@ -371,7 +369,7 @@ export function VideoSubmitPage() {
             <div>
               <p className="text-sm font-medium text-danger-800">Error</p>
               <p className="text-xs text-danger-600 mt-1">
-                {errorMessage(
+                {submissionErrorMessage(
                   activeMutation.error,
                   mode === "youtube"
                     ? "Failed to process video. Please try again."

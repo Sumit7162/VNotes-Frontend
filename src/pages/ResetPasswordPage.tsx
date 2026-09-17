@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { KeyRound, Loader2 } from "lucide-react";
-import { Button, PasswordInput } from "@/components/ui/auth-fuse";
+import { Loader2 } from "lucide-react";
+
+import { PasswordInput } from "@/components/ui/auth-fuse";
+import { AuthLayout } from "@/components/layout/AuthLayout";
 import { authApi, errorMessage, saveSession } from "@/services/auth";
 
 /** Where the link in the password-reset email lands. */
@@ -38,73 +40,77 @@ export function ResetPasswordPage() {
     }
   };
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-paper-100 px-4">
-      <div className="w-full max-w-md rounded-2xl border border-line bg-paper-50 p-8 shadow-lg">
-        <div className="mb-6 text-center">
-          <KeyRound className="mx-auto mb-4 h-9 w-9 text-primary" aria-hidden="true" />
-          <h1 className="font-display text-xl font-semibold text-ink-800">Choose a new password</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            At least 8 characters, including a letter and a number.
+  if (!token) {
+    return (
+      <AuthLayout title="Choose a new password">
+        <div className="surface-card p-6 text-center">
+          <p className="text-sm text-danger-700">
+            This link is missing its reset code. Open the link from the email directly.
           </p>
+          <Link
+            to="/login"
+            className="btn-primary mt-5 inline-flex h-10 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors"
+          >
+            Back to sign in
+          </Link>
         </div>
+      </AuthLayout>
+    );
+  }
 
-        {!token ? (
-          <div className="grid gap-4 text-center">
-            <p className="text-sm text-destructive">
-              This link is missing its reset code. Open the link from the email directly.
-            </p>
-            <Button asChild variant="outline">
-              <Link to="/login">Back to sign in</Link>
-            </Button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="grid gap-4">
-            <PasswordInput
-              name="password"
-              label="New password"
-              required
-              minLength={8}
-              autoComplete="new-password"
-              placeholder="New password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <PasswordInput
-              name="confirm-password"
-              label="Confirm new password"
-              required
-              minLength={8}
-              autoComplete="new-password"
-              placeholder="Repeat the password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-            />
+  return (
+    <AuthLayout
+      title="Choose a new password"
+      subtitle="At least 8 characters, including a letter and a number."
+    >
+      <form onSubmit={handleSubmit} className="grid gap-4">
+        <PasswordInput
+          name="password"
+          label="New password"
+          required
+          minLength={8}
+          autoComplete="new-password"
+          placeholder="New password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <PasswordInput
+          name="confirm-password"
+          label="Confirm new password"
+          required
+          minLength={8}
+          autoComplete="new-password"
+          placeholder="Repeat the password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+        />
 
-            {error && (
-              <p
-                role="alert"
-                className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-              >
-                {error}
-              </p>
-            )}
-
-            <Button type="submit" disabled={busy}>
-              {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-              Save new password
-            </Button>
-
-            <Link
-              to="/login"
-              className="text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
-            >
-              Back to sign in
-            </Link>
-          </form>
+        {error && (
+          <p
+            role="alert"
+            className="rounded-lg border border-danger-200 bg-danger-50 px-3.5 py-2.5 text-sm text-danger-700"
+          >
+            {error}
+          </p>
         )}
-      </div>
-    </div>
+
+        <button
+          type="submit"
+          disabled={busy}
+          className="btn-primary mt-1 inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+          Save new password
+        </button>
+
+        <Link
+          to="/login"
+          className="text-center text-sm text-ink-500 underline-offset-4 transition-colors hover:text-ink-900 hover:underline"
+        >
+          Back to sign in
+        </Link>
+      </form>
+    </AuthLayout>
   );
 }
 

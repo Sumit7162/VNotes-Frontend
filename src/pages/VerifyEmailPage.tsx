@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2, Loader2, MailWarning } from "lucide-react";
-import { Button } from "@/components/ui/auth-fuse";
+
+import { AuthLayout } from "@/components/layout/AuthLayout";
 import { authApi, errorMessage, saveSession } from "@/services/auth";
 
 /**
@@ -29,7 +30,9 @@ export function VerifyEmailPage() {
 
     if (!token) {
       setStatus("failed");
-      setMessage("This link is missing its verification code. Open the link from the email directly.");
+      setMessage(
+        "This link is missing its verification code. Open the link from the email directly.",
+      );
       return;
     }
 
@@ -48,32 +51,32 @@ export function VerifyEmailPage() {
       });
   }, [token, navigate]);
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-paper-100 px-4">
-      <div className="w-full max-w-md rounded-2xl border border-line bg-paper-50 p-8 text-center shadow-lg">
-        <img
-          src="/logo-tile.png"
-          alt=""
-          width={48}
-          height={48}
-          className="mx-auto mb-5 h-12 w-12 rounded-xl ring-1 ring-border"
-        />
+  const heading =
+    status === "working"
+      ? "Verifying your email"
+      : status === "done"
+        ? "Email verified"
+        : "This link did not work";
 
+  return (
+    <AuthLayout title={heading}>
+      <div className="surface-card p-6 text-center">
         {status === "working" && (
           <>
-            <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-primary" aria-hidden="true" />
-            <h1 className="font-display text-xl font-semibold text-ink-800">
-              Verifying your email…
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">This only takes a moment.</p>
+            <Loader2
+              className="mx-auto h-8 w-8 animate-spin text-accent-600"
+              aria-hidden="true"
+            />
+            <p className="mt-4 text-sm text-ink-500">This only takes a moment.</p>
           </>
         )}
 
         {status === "done" && (
           <>
-            <CheckCircle2 className="mx-auto mb-4 h-10 w-10 text-primary" aria-hidden="true" />
-            <h1 className="font-display text-xl font-semibold text-ink-800">Email verified</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-success-50 text-success-600">
+              <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <p className="mt-4 text-sm leading-relaxed text-ink-600">
               Your account is active. Taking you to your dashboard…
             </p>
           </>
@@ -81,21 +84,23 @@ export function VerifyEmailPage() {
 
         {status === "failed" && (
           <>
-            <MailWarning className="mx-auto mb-4 h-10 w-10 text-destructive" aria-hidden="true" />
-            <h1 className="font-display text-xl font-semibold text-ink-800">
-              This link did not work
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">{message}</p>
-            <Button asChild className="mt-6 w-full">
-              <Link to="/login">Back to sign in</Link>
-            </Button>
-            <p className="mt-3 text-xs text-muted-foreground">
+            <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-danger-50 text-danger-600">
+              <MailWarning className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <p className="mt-4 text-sm leading-relaxed text-ink-600">{message}</p>
+            <Link
+              to="/login"
+              className="btn-primary mt-5 inline-flex h-10 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors"
+            >
+              Back to sign in
+            </Link>
+            <p className="mt-3 text-xs text-ink-500">
               Signing in with an unverified account offers to send a fresh link.
             </p>
           </>
         )}
       </div>
-    </div>
+    </AuthLayout>
   );
 }
 

@@ -87,6 +87,15 @@ function formatDuration(seconds: number | null): string | null {
   return `${seconds} sec`;
 }
 
+/** The video id out of any of the URL shapes YouTube hands out. */
+function youtubeThumbnail(url: string | null): string | null {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
+  );
+  return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
+}
+
 interface VideoCardProps {
   video: VideoType;
 }
@@ -112,6 +121,8 @@ export function VideoCard({ video }: VideoCardProps) {
     steps.findIndex((step) => step.status === video.status)
   );
   const isActive = video.status !== "completed" && video.status !== "failed";
+  const thumbnail = youtubeThumbnail(video.youtube_url);
+  const duration = formatDuration(video.duration_seconds);
   const progress = Math.round((currentStep / (steps.length - 1)) * 100);
 
   return (
@@ -119,13 +130,35 @@ export function VideoCard({ video }: VideoCardProps) {
       <div className="bg-paper-50 rounded-2xl border border-line p-4 shadow-sm hover:shadow-md hover:border-accent-200 transition-all duration-200">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className="flex-shrink-0 w-10 h-10 bg-accent-50 ring-1 ring-inset ring-accent-100 rounded-xl flex items-center justify-center">
-              {isUpload ? (
-                <FileText className="h-5 w-5 text-accent-600" />
-              ) : (
-                <Video className="h-5 w-5 text-accent-600" />
-              )}
-            </div>
+            {thumbnail ? (
+              <div className="relative h-[54px] w-24 flex-shrink-0 overflow-hidden rounded-lg border border-line bg-paper-200">
+                <img
+                  src={thumbnail}
+                  alt=""
+                  loading="lazy"
+                  // A private or removed video serves a placeholder rather than
+                  // a 404, so the tile is hidden on error and the layout simply
+                  // closes up around it.
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                  className="h-full w-full object-cover"
+                />
+                {duration && (
+                  <span className="absolute bottom-1 right-1 rounded bg-night-900/80 px-1 py-px text-[10px] font-medium tabular-nums text-white">
+                    {duration}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-accent-50 ring-1 ring-inset ring-accent-100">
+                {isUpload ? (
+                  <FileText className="h-5 w-5 text-accent-600" />
+                ) : (
+                  <Video className="h-5 w-5 text-accent-600" />
+                )}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-semibold text-ink-900 truncate">
                 {video.title || "Processing..."}
@@ -140,10 +173,8 @@ export function VideoCard({ video }: VideoCardProps) {
                   {status.icon}
                   {status.label}
                 </span>
-                {formatDuration(video.duration_seconds) && (
-                  <span className="text-xs text-ink-400">
-                    {formatDuration(video.duration_seconds)}
-                  </span>
+                {duration && !thumbnail && (
+                  <span className="text-xs text-ink-400">{duration}</span>
                 )}
                 <span className="text-xs text-ink-400">
                   {formatDateTime(video.created_at)}

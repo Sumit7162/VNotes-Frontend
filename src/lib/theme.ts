@@ -85,7 +85,7 @@ export function applyTheme(theme: Theme): ResolvedTheme {
   // A pinned page owns the browser chrome colour while it is mounted.
   if (!isPinnedDark) {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (meta) meta.content = shouldBeDark ? "#06070a" : "#F7F9FC";
+    if (meta) meta.content = shouldBeDark ? "#080D14" : "#F7F9FC";
   }
 
   return resolved;

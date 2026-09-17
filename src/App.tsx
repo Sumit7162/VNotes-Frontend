@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { Header } from "./components/Header";
+import { AppShell } from "./components/layout/AppShell";
 import { LoginPage } from "./pages/LoginPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
@@ -14,23 +14,6 @@ import { QuizPage } from "./pages/QuizPage";
 import { QuizDashboardPage } from "./pages/QuizDashboardPage";
 import { QuizAttemptPage } from "./pages/QuizAttemptPage";
 import { ProfilePage } from "./pages/ProfilePage";
-
-function AppLayout({ children }: { children: React.ReactNode }) {
-  return (
-    // h-screen rather than min-h-screen: the shell has to be exactly the
-    // viewport so that <main> is the only thing that scrolls. With min-h-screen
-    // a long page grew the shell itself, so the whole document scrolled and
-    // carried the header off the top with it.
-    <div className="h-screen bg-paper-100 text-ink-800 flex flex-col overflow-hidden print:block print:h-auto print:overflow-visible print:min-h-0 print:bg-none">
-      <Header />
-      {/* min-h-0 lets this flex child shrink below its content height, which is
-          what allows it to scroll instead of the page. */}
-      <main className="flex-1 min-h-0 overflow-y-auto print:overflow-visible print:block px-3 pb-8 pt-4 sm:px-6">
-        {children}
-      </main>
-    </div>
-  );
-}
 
 function App() {
   return (
@@ -48,9 +31,9 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppShell>
                 <DashboardPage />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />
@@ -58,9 +41,9 @@ function App() {
           path="/submit"
           element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppShell>
                 <VideoSubmitPage />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />
@@ -68,9 +51,9 @@ function App() {
           path="/notes"
           element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppShell>
                 <NotesListPage />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />
@@ -78,9 +61,9 @@ function App() {
           path="/notes/:videoId"
           element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppShell>
                 <NotesViewerPage />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />
@@ -88,9 +71,9 @@ function App() {
           path="/quiz"
           element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppShell>
                 <QuizDashboardPage />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />
@@ -100,9 +83,9 @@ function App() {
           path="/quiz/attempt/:attemptId"
           element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppShell>
                 <QuizAttemptPage />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />
@@ -110,9 +93,9 @@ function App() {
           path="/quiz/:videoId"
           element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppShell>
                 <QuizPage />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />
@@ -120,9 +103,9 @@ function App() {
           path="/profile"
           element={
             <ProtectedRoute>
-              <AppLayout>
+              <AppShell>
                 <ProfilePage />
-              </AppLayout>
+              </AppShell>
             </ProtectedRoute>
           }
         />

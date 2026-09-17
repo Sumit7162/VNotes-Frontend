@@ -13,7 +13,7 @@ import { pinDarkSurface, unpinDarkSurface } from "../lib/theme";
  * already-present `dark` class is left alone so a future global toggle is not
  * clobbered on the way out.
  */
-export function useDarkSurface(themeColor = "#06070a") {
+export function useDarkSurface(themeColor = "#080D14") {
   useEffect(() => {
     const root = document.documentElement;
     const hadDark = root.classList.contains("dark");
