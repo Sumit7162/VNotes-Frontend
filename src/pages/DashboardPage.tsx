@@ -3,11 +3,9 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useVideos } from "../hooks/useVideos";
 import { useAuth } from "../hooks/useAuth";
-import { useUsage } from "../hooks/useUsage";
 import { VideoCard } from "../components/VideoCard";
-import { UsageStats } from "../components/UsageStats";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import { FileText, ArrowRight, AlertCircle, CheckCircle, Circle, Loader2 } from "lucide-react";
+import { FileText, ArrowRight, AlertCircle, CheckCircle, Circle, Loader2, Video } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { VideoStatus } from "../types";
 
@@ -50,12 +48,6 @@ export function DashboardPage() {
     0,
     processingSteps.findIndex((step) => step.status === activeVideo?.status)
   );
-  const {
-    data: usageData,
-    isLoading: usageLoading,
-    isError: usageError,
-    error: usageErrorDetail,
-  } = useUsage(hasActiveVideo ? 10000 : false);
 
   useEffect(() => {
     if (hadActiveVideo.current && !hasActiveVideo) {
@@ -65,32 +57,30 @@ export function DashboardPage() {
     hadActiveVideo.current = hasActiveVideo;
   }, [hasActiveVideo, queryClient]);
 
-  if ((videosLoading && !videosData) || (usageLoading && !usageData)) {
+  if (videosLoading && !videosData) {
     return <LoadingSpinner message="Loading dashboard..." />;
   }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink-900">Welcome back, {displayName}</h2>
-          <p className="text-sm text-ink-500 mt-1.5">
-            Overview of your video processing activity
-          </p>
-        </div>
-        <Link
-          to="/submit"
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm transition-colors duration-150"
-        >
-          Process New Video
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+      <div>
+        <h2 className="font-display text-3xl font-semibold tracking-tight text-ink-900">Welcome back, {displayName}</h2>
+        <p className="text-sm text-ink-500 mt-1.5">
+          Overview of your video processing activity
+        </p>
       </div>
 
-      <UsageStats
-        usage={usageData?.today}
-        totalVideos={videosData?.total ?? usageData?.total_videos ?? 0}
-      />
+      {/* The one action this page exists for, in the space the usage cards used
+          to fill. The remaining quota is still on the submit page, where it is
+          about to matter, and on the profile page. */}
+      <Link
+        to="/submit"
+        className="group flex w-full items-center justify-center gap-3 rounded-2xl bg-accent px-6 py-8 text-lg font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 focus-visible:ring-offset-2 sm:py-10 sm:text-xl"
+      >
+        <Video className="h-6 w-6 flex-shrink-0" aria-hidden="true" />
+        Process New Video
+        <ArrowRight className="h-5 w-5 flex-shrink-0 transition-transform duration-150 group-hover:translate-x-1" aria-hidden="true" />
+      </Link>
 
       {activeVideo && (
         <div className="rounded-2xl border border-accent-100 bg-accent-50 p-4 shadow-sm">
@@ -142,7 +132,7 @@ export function DashboardPage() {
         </div>
       )}
 
-      {(videosError || usageError) && (
+      {videosError && (
         <div className="rounded-lg border border-danger-200 bg-danger-50 p-4">
           <div className="flex items-start gap-2">
             <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-danger-600" />
@@ -153,9 +143,7 @@ export function DashboardPage() {
               <p className="mt-1 text-xs text-danger-600">
                 {videosErrorDetail instanceof Error
                   ? videosErrorDetail.message
-                  : usageErrorDetail instanceof Error
-                    ? usageErrorDetail.message
-                    : "Please check that the backend is running and your login token is valid."}
+                  : "Please check that the backend is running and your login token is valid."}
               </p>
             </div>
           </div>
