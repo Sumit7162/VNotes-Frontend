@@ -275,36 +275,42 @@ html.dark .markdown-content a:hover {
   background-color: var(--primary-hover);
 }
 
-/* The hero's ground: a restrained indigo-to-blue wash rather than a saturated
-   gradient, with a soft highlight off the top left so the panel has a light
-   source instead of being a flat colour field. Dark enough in both themes to
-   carry white type, which is why it does not swap with the theme. */
-.hero-surface {
-  background:
-    radial-gradient(90% 120% at 0% 0%, rgba(120, 155, 255, 0.28), transparent 60%),
-    radial-gradient(70% 110% at 100% 100%, rgba(18, 32, 82, 0.55), transparent 65%),
-    linear-gradient(120deg, #2D4FB8 0%, #2A5FD9 45%, #3B3592 100%);
-}
-
-/* The faint grid behind the hero illustration. Two hairline gradients rather
-   than an image, so it costs nothing and stays crisp at any zoom. */
-.hero-grid {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
-  background-size: 28px 28px;
-}
-
-/* Page headings take the serif. Used sparingly - page titles and the hero
-   only - so the editorial note reads as deliberate rather than decorative. */
+/* Page headings take the serif, set tight and large. This is the one place the
+   interface raises its voice, so nothing else needs a colour or a box to be
+   read as important. */
 .page-title {
-  @apply font-display font-semibold tracking-tight text-ink-900;
+  @apply font-display font-semibold tracking-[-0.02em] text-ink-900;
+}
+
+/* The small capitalised label above a heading or over a section. Structure
+   comes from labels and rules here rather than from tinted badges. */
+.overline {
+  @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-400;
+}
+
+/* A hairline used as a section divider. Deliberately full-bleed within its
+   column: a rule that stops short reads as an underline, not a division. */
+.rule {
+  @apply border-0 border-t border-line;
+}
+
+/* Form fields. One flat, hairline-bordered treatment; the focus state deepens
+   the border and lifts the ground rather than painting a halo around it. */
+.field {
+  @apply w-full rounded-md border border-line-strong bg-paper-50 px-3 py-2.5 text-sm text-ink-900 outline-none transition-colors;
+  @apply placeholder:text-ink-400 focus:border-ink-600 disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+/* A row in a list of records - notes, videos. Separated by rules rather than
+   boxed, so a list of ten reads as one table instead of ten floating cards. */
+.record-row {
+  @apply flex items-start gap-4 border-t border-line py-4 transition-colors;
 }
 
 /* Sidebar and menu rows. The active row is a tinted block rather than a border
    or a bar, which is quieter and survives both themes. */
 .nav-row {
-  @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150;
+  @apply flex items-center gap-3 rounded-md px-3 py-[7px] text-sm font-medium transition-colors duration-150;
 }
 .nav-row-idle {
   @apply text-ink-600 hover:bg-paper-200 hover:text-ink-900;
@@ -320,7 +326,7 @@ html.dark .nav-row-active {
 /* Cards. One treatment, so panels across the app agree on radius and border
    instead of each page inventing its own. */
 .surface-card {
-  @apply rounded-xl border border-line bg-paper-50;
+  @apply rounded-lg border border-line bg-paper-50;
 }
 
 /* Dropdown entrance. Deliberately short and small: a menu that slides in from

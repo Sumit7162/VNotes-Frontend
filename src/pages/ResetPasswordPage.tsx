@@ -43,13 +43,13 @@ export function ResetPasswordPage() {
   if (!token) {
     return (
       <AuthLayout title="Choose a new password">
-        <div className="surface-card p-6 text-center">
-          <p className="text-sm text-danger-700">
+        <div>
+          <p className="text-sm leading-relaxed text-danger-700">
             This link is missing its reset code. Open the link from the email directly.
           </p>
           <Link
             to="/login"
-            className="btn-primary mt-5 inline-flex h-10 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors"
+            className="btn-primary mt-6 inline-flex h-10 w-full items-center justify-center rounded-md text-sm font-semibold transition-colors"
           >
             Back to sign in
           </Link>
@@ -97,7 +97,7 @@ export function ResetPasswordPage() {
         <button
           type="submit"
           disabled={busy}
-          className="btn-primary mt-1 inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn-primary mt-1 inline-flex h-10 items-center justify-center gap-2 rounded-md text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
         >
           {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
           Save new password

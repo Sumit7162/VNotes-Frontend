@@ -130,15 +130,21 @@ export function LoginPage() {
         title="Check your inbox"
         subtitle="Your account is created but not active yet."
       >
-        <div className="surface-card p-6 text-center">
-          <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
-            <MailCheck className="h-5 w-5" aria-hidden="true" />
-          </span>
-          <p className="mt-4 text-sm leading-relaxed text-ink-600">
-            We sent a verification link to{" "}
-            <span className="font-medium text-ink-900">{sentTo}</span>. Open it to activate
-            your account — the link works for 24 hours.
-          </p>
+        <div>
+          {/* The sentence is wrapped in its own span: as direct children of a
+              flex row, the text either side of {sentTo} would become separate
+              flex items and the line would break into three blocks. */}
+          <div className="flex items-start gap-2.5">
+            <MailCheck
+              className="mt-0.5 h-4 w-4 shrink-0 text-accent-600"
+              aria-hidden="true"
+            />
+            <p className="text-sm leading-relaxed text-ink-600">
+              We sent a verification link to{" "}
+              <span className="font-medium text-ink-900">{sentTo}</span>. Open it to activate
+              your account — the link works for 24 hours.
+            </p>
+          </div>
 
           <Button
             type="button"
@@ -257,7 +263,7 @@ export function LoginPage() {
         <button
           type="submit"
           disabled={busy}
-          className="btn-primary mt-1 inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          className="btn-primary mt-1 inline-flex h-10 items-center justify-center gap-2 rounded-md text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
         >
           {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
           {submit}

@@ -60,23 +60,23 @@ export function VerifyEmailPage() {
 
   return (
     <AuthLayout title={heading}>
-      <div className="surface-card p-6 text-center">
+      <div>
         {status === "working" && (
           <>
-            <Loader2
-              className="mx-auto h-8 w-8 animate-spin text-accent-600"
-              aria-hidden="true"
-            />
-            <p className="mt-4 text-sm text-ink-500">This only takes a moment.</p>
+            <p className="flex items-center gap-2.5 text-sm text-ink-500">
+              <Loader2 className="h-4 w-4 animate-spin text-accent-600" aria-hidden="true" />
+              This only takes a moment.
+            </p>
           </>
         )}
 
         {status === "done" && (
           <>
-            <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-success-50 text-success-600">
-              <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <p className="mt-4 text-sm leading-relaxed text-ink-600">
+            <p className="flex items-start gap-2.5 text-sm leading-relaxed text-ink-600">
+              <CheckCircle2
+                className="mt-0.5 h-4 w-4 shrink-0 text-success-600"
+                aria-hidden="true"
+              />
               Your account is active. Taking you to your dashboard…
             </p>
           </>
@@ -84,13 +84,16 @@ export function VerifyEmailPage() {
 
         {status === "failed" && (
           <>
-            <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-danger-50 text-danger-600">
-              <MailWarning className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <p className="mt-4 text-sm leading-relaxed text-ink-600">{message}</p>
+            <p className="flex items-start gap-2.5 text-sm leading-relaxed text-ink-600">
+              <MailWarning
+                className="mt-0.5 h-4 w-4 shrink-0 text-danger-600"
+                aria-hidden="true"
+              />
+              {message}
+            </p>
             <Link
               to="/login"
-              className="btn-primary mt-5 inline-flex h-10 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors"
+              className="btn-primary mt-6 inline-flex h-10 w-full items-center justify-center rounded-md text-sm font-semibold transition-colors"
             >
               Back to sign in
             </Link>

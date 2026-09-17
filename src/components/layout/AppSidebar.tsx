@@ -51,7 +51,7 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav
       aria-label="Primary"
-      className="flex h-full flex-col gap-1 overflow-y-auto px-3 py-4"
+      className="flex h-full flex-col gap-0.5 overflow-y-auto px-3 py-4"
       onClick={onNavigate}
     >
       <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-400">
@@ -68,14 +68,12 @@ function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
         <NavRow key={item.label} item={item} pathname={pathname} />
       ))}
 
-      {/* Pushed to the bottom so the navigation reads as a column of actions
-          with a quiet footnote under it, rather than a list that just stops. */}
-      <div className="mt-auto pt-6">
-        <div className="rounded-xl border border-sidebar-line bg-paper-100 p-3.5">
-          <p className="font-display text-[13px] italic leading-relaxed text-ink-600">
-            “Knowledge grows when shared.”
-          </p>
-        </div>
+      {/* A rule and a line of small type close the column, rather than the
+          list simply stopping in the middle of the panel. */}
+      <div className="mt-auto border-t border-sidebar-line px-3 pt-3">
+        <p className="text-[11px] leading-relaxed text-ink-400">
+          Notes are written from transcripts and kept to your account alone.
+        </p>
       </div>
     </nav>
   );
