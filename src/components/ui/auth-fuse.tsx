@@ -240,6 +240,12 @@ export interface AuthUIProps {
    * it, so whatever goes here has to stay quiet enough to read a form over.
    */
   formBackgroundSlot?: React.ReactNode;
+  /**
+   * Drops the right-hand panel entirely and gives the form the whole viewport,
+   * centred. The panel is decorative - the form never depended on it - so this
+   * changes nothing but the layout.
+   */
+  hideAside?: boolean;
 }
 
 const defaultSignInContent = {
@@ -280,6 +286,7 @@ export function AuthUI({
   formBackgroundSlot,
   formPanelClassName,
   formCardClassName,
+  hideAside = false,
 }: AuthUIProps) {
   const isSignIn = mode === "signin";
 
@@ -295,7 +302,12 @@ export function AuthUI({
   const currentContent = isSignIn ? finalSignInContent : finalSignUpContent;
 
   return (
-    <div className="w-full min-h-screen bg-background md:grid md:grid-cols-2">
+    <div
+      className={cn(
+        "w-full min-h-screen bg-background",
+        !hideAside && "md:grid md:grid-cols-2",
+      )}
+    >
       <style>{`
         input[type="password"]::-ms-reveal,
         input[type="password"]::-ms-clear {
@@ -304,7 +316,8 @@ export function AuthUI({
       `}</style>
       <div
         className={cn(
-          "relative flex min-h-screen items-center justify-center p-6 md:min-h-0",
+          "relative flex min-h-screen items-center justify-center p-6",
+          !hideAside && "md:min-h-0",
           formPanelClassName
         )}
       >
@@ -316,7 +329,13 @@ export function AuthUI({
             {formBackgroundSlot}
           </div>
         ) : null}
-        <div className={cn("relative z-10 mx-auto grid w-[350px] gap-5", formCardClassName)}>
+        <div
+          className={cn(
+            "relative z-10 mx-auto grid gap-5",
+            hideAside ? "w-full" : "w-[350px]",
+            formCardClassName,
+          )}
+        >
           {brand}
 
           <div className="flex flex-col items-center gap-2 text-center">
@@ -345,51 +364,53 @@ export function AuthUI({
         </div>
       </div>
 
-      <div
-        className={cn(
-          "hidden md:block relative overflow-hidden transition-all duration-500 ease-in-out",
-          !asideSlot && "bg-cover bg-center"
-        )}
-        style={asideSlot ? undefined : { backgroundImage: `url(${currentContent.image.src})` }}
-        role={asideSlot ? undefined : "img"}
-        aria-label={asideSlot ? undefined : currentContent.image.alt}
-        key={asideSlot ? "aside" : currentContent.image.src}
-      >
-        {asideSlot ? (
-          <div className="absolute inset-0">{asideSlot}</div>
-        ) : (
-          <div className="absolute inset-0 bg-background/35" />
-        )}
+      {!hideAside && (
         <div
           className={cn(
-            "absolute inset-x-0 bottom-0 h-[160px] bg-gradient-to-t to-transparent",
-            // An aside slot supplies its own dark artwork, so the fade has to
-            // come off that rather than off the page surface, which may be white.
-            asideSlot ? "from-[#06070a]" : "from-background"
+            "hidden md:block relative overflow-hidden transition-all duration-500 ease-in-out",
+            !asideSlot && "bg-cover bg-center"
           )}
-        />
-
-        <div className="relative z-10 flex h-full flex-col items-center justify-end p-2 pb-6">
-          <blockquote
+          style={asideSlot ? undefined : { backgroundImage: `url(${currentContent.image.src})` }}
+          role={asideSlot ? undefined : "img"}
+          aria-label={asideSlot ? undefined : currentContent.image.alt}
+          key={asideSlot ? "aside" : currentContent.image.src}
+        >
+          {asideSlot ? (
+            <div className="absolute inset-0">{asideSlot}</div>
+          ) : (
+            <div className="absolute inset-0 bg-background/35" />
+          )}
+          <div
             className={cn(
-              "space-y-2 text-center",
-              asideSlot ? "text-white" : "text-foreground"
+              "absolute inset-x-0 bottom-0 h-[160px] bg-gradient-to-t to-transparent",
+              // An aside slot supplies its own dark artwork, so the fade has to
+              // come off that rather than off the page surface, which may be white.
+              asideSlot ? "from-[#06070a]" : "from-background"
             )}
-          >
-            <p className="text-lg font-medium">
-              “<Typewriter key={currentContent.quote.text} text={currentContent.quote.text} speed={60} />”
-            </p>
-            <cite
+          />
+  
+          <div className="relative z-10 flex h-full flex-col items-center justify-end p-2 pb-6">
+            <blockquote
               className={cn(
-                "block text-sm font-light not-italic",
-                asideSlot ? "text-white/60" : "text-muted-foreground"
+                "space-y-2 text-center",
+                asideSlot ? "text-white" : "text-foreground"
               )}
             >
-              — {currentContent.quote.author}
-            </cite>
-          </blockquote>
+              <p className="text-lg font-medium">
+                “<Typewriter key={currentContent.quote.text} text={currentContent.quote.text} speed={60} />”
+              </p>
+              <cite
+                className={cn(
+                  "block text-sm font-light not-italic",
+                  asideSlot ? "text-white/60" : "text-muted-foreground"
+                )}
+              >
+                — {currentContent.quote.author}
+              </cite>
+            </blockquote>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

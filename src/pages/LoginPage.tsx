@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
 import { AuthUI, Button, Input, Label, PasswordInput } from "@/components/ui/auth-fuse";
-import { MatrixRain } from "@/components/ui/matrix-rain";
 import RecursiveErosionBackground from "@/components/ui/recursive-erosion";
 import { authApi, errorMessage, isUnverifiedError, saveSession } from "@/services/auth";
 
@@ -226,8 +225,8 @@ export function LoginPage() {
 
   return (
     <AuthUI
+      hideAside
       mode={mode === "signup" ? "signup" : "signin"}
-      asideSlot={<MatrixRain />}
       // Held back below `sm`, where the card drops its own background and dark
       // form text would sit straight on the black ground. From sm up the card
       // is 90% white, so the form reads cleanly over the effect.
@@ -237,10 +236,10 @@ export function LoginPage() {
         </div>
       }
       formPanelClassName="login-surface login-surface-night"
-      // The Google button is a fixed 320px wide, so the card only gains its
-      // padding from sm up, where 420px minus p-8 still clears it. On a phone
-      // it drops the chrome and uses the full width instead of clipping.
-      formCardClassName="w-full max-w-[420px] sm:rounded-2xl sm:border sm:border-line sm:bg-paper-50/90 sm:p-8 sm:shadow-lg"
+      // The card only gains its padding from sm up, where 520px minus p-8
+      // still clears the Google button. On a phone it drops the chrome and
+      // uses the full width instead of clipping.
+      formCardClassName="w-full max-w-[520px] sm:rounded-2xl sm:border sm:border-line sm:bg-paper-50/90 sm:p-8 sm:shadow-lg"
       title="Sign in to V-Notes AI"
       signUpTitle={mode === "forgot" ? "Reset your password" : "Create your account"}
       subtitle={
@@ -272,7 +271,7 @@ export function LoginPage() {
             shape="pill"
             size="large"
             text="continue_with"
-            width="320"
+            width="400"
           />
         )
       }
