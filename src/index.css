@@ -275,6 +275,26 @@ html.dark .markdown-content a:hover {
   background-color: var(--primary-hover);
 }
 
+/* The hero's ground: a restrained indigo-to-blue wash rather than a saturated
+   gradient, with a soft highlight off the top left so the panel has a light
+   source instead of being a flat colour field. Dark enough in both themes to
+   carry white type, which is why it does not swap with the theme. */
+.hero-surface {
+  background:
+    radial-gradient(90% 120% at 0% 0%, rgba(120, 155, 255, 0.28), transparent 60%),
+    radial-gradient(70% 110% at 100% 100%, rgba(18, 32, 82, 0.55), transparent 65%),
+    linear-gradient(120deg, #2D4FB8 0%, #2A5FD9 45%, #3B3592 100%);
+}
+
+/* The faint grid behind the hero illustration. Two hairline gradients rather
+   than an image, so it costs nothing and stays crisp at any zoom. */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
 /* Page headings take the serif, set tight and large. This is the one place the
    interface raises its voice, so nothing else needs a colour or a box to be
    read as important. */
