@@ -1,7 +1,7 @@
 
 import { useUsage } from "../hooks/useUsage";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import { User, Mail, Calendar, CreditCard, ArrowLeft, Infinity } from "lucide-react";
+import { User, Mail, Calendar, ArrowLeft, Infinity } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
@@ -73,16 +73,6 @@ export function ProfilePage() {
                       year: "numeric",
                     })
                   : "N/A"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <CreditCard className="h-5 w-5 text-ink-400" />
-            <div>
-              <p className="text-xs text-ink-500">Current Plan</p>
-              <p className="text-sm font-medium text-ink-900 capitalize">
-                {dbUser?.plan || "Free"}
               </p>
             </div>
           </div>

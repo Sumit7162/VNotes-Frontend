@@ -11,7 +11,6 @@ import {
   X,
 } from "lucide-react";
 
-import { useUsage } from "../hooks/useUsage";
 import { submissionErrorMessage, useVideoSubmission } from "../hooks/useVideoSubmission";
 import { YOUTUBE_LOCK_MESSAGE, YOUTUBE_SUBMISSION_LOCKED } from "@/lib/features";
 import { cn } from "@/lib/utils";
@@ -44,7 +43,6 @@ export function VideoSubmitPage() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: usageData } = useUsage();
   const { youtube: processMutation, transcript: transcriptMutation } = useVideoSubmission();
 
   const activeMutation = mode === "youtube" ? processMutation : transcriptMutation;
@@ -128,10 +126,6 @@ export function VideoSubmitPage() {
       title: transcriptTitle.trim() || undefined,
     });
   };
-
-  const remainingLong = usageData?.today?.remaining_videos ?? 2;
-  const remainingShort = usageData?.today?.remaining_short_videos ?? 10;
-  const maxDuration = usageData?.today?.max_duration_minutes ?? 30;
 
   const transcriptChars = transcript.trim().length;
   const transcriptWords = transcript.trim() ? transcript.trim().split(/\s+/).length : 0;
@@ -390,7 +384,7 @@ export function VideoSubmitPage() {
         </p>
       )}
 
-      {/* ---- What happens, and what it costs you --------------------------- */}
+      {/* ---- What happens next --------------------------------------------- */}
       <section className="rule mt-12 pt-7">
         <h2 className="overline">What happens next</h2>
         <ol className="mt-4 space-y-3">
@@ -401,28 +395,6 @@ export function VideoSubmitPage() {
             </li>
           ))}
         </ol>
-      </section>
-
-      <section className="rule mt-8 pt-7">
-        <h2 className="overline">Free plan</h2>
-        <dl className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-3">
-          {[
-            { term: "Short videos left today", value: remainingShort },
-            { term: "Long videos left today", value: remainingLong },
-            { term: "Longest video", value: `${maxDuration} min` },
-          ].map((item) => (
-            <div key={item.term}>
-              <dt className="text-xs text-ink-500">{item.term}</dt>
-              <dd className="mt-0.5 font-display text-xl font-semibold tabular-nums text-ink-900">
-                {item.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-4 text-xs leading-relaxed text-ink-400">
-          These apply to YouTube links only. Uploaded transcripts are unlimited — any length,
-          any number, and they do not count against the daily allowance.
-        </p>
       </section>
     </div>
   );
