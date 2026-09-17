@@ -7,6 +7,7 @@ import { Loader2, MailCheck } from "lucide-react";
 import { Button, Input, Label, PasswordInput } from "@/components/ui/auth-fuse";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { authApi, errorMessage, isUnverifiedError, saveSession } from "@/services/auth";
+import { useTheme } from "@/hooks/useTheme";
 
 type Mode = "signin" | "signup" | "forgot";
 
@@ -30,6 +31,10 @@ const copy: Record<Mode, { title: string; subtitle: string; submit: string }> = 
 
 export function LoginPage() {
   const navigate = useNavigate();
+  // The page is no longer pinned dark, so Google's button has to follow the
+  // ground it is sitting on: a black pill disappears into a dark page, and the
+  // outline version disappears into a white one.
+  const { resolvedTheme } = useTheme();
   const [mode, setMode] = useState<Mode>("signin");
 
   const [email, setEmail] = useState("");
@@ -309,11 +314,11 @@ export function LoginPage() {
           onSuccess={handleGoogleSuccess}
           onError={() => setError("Google Sign-In was unsuccessful.")}
           useOneTap
-          theme="filled_black"
+          theme={resolvedTheme === "dark" ? "filled_black" : "outline"}
           shape="pill"
           size="large"
           text="continue_with"
-          width="320"
+          width="400"
         />
       </div>
     </AuthLayout>
