@@ -169,6 +169,19 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   background: #33455C;
 }
 
+/* Sign-in panel ground. A blue base rather than a near-white one, carrying the
+   two ends of the logo gradient as soft glows: brand blue from the top left,
+   cyan from the bottom right, with a third pass low down to keep the corner
+   from going flat. The white card sits on top of all of it, so the panel can
+   hold real colour and the form still reads as the focus. */
+.login-surface {
+  background:
+    radial-gradient(62% 55% at 10% 6%, rgba(42, 95, 217, 0.30), transparent 70%),
+    radial-gradient(52% 48% at 94% 90%, rgba(14, 144, 160, 0.26), transparent 72%),
+    radial-gradient(70% 40% at 50% 108%, rgba(42, 95, 217, 0.16), transparent 70%),
+    #E6EEFB;
+}
+
 /* Landing page ground. The page used to be flat neutral-950, which read as a
    plain black sheet; this lays the three hues on as soft glows over a deep
    indigo base - brand blue from the top left, violet through the middle, pink
@@ -199,6 +212,32 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 .home-tile {
   background: rgba(64, 47, 126, 0.55);
+}
+
+/* Below sm the form card drops its own background, so the panel ground is what
+   the form text sits directly on. In dark mode that text is near-white, which
+   the light blue ground above cannot carry - so it goes dark here. Scoped to
+   the small breakpoint deliberately: from sm up .login-surface-night already
+   owns the ground, and a broader rule would outrank it on specificity. */
+@media (max-width: 639.98px) {
+  html.dark .login-surface {
+    background:
+      radial-gradient(62% 55% at 10% 6%, rgba(42, 95, 217, 0.26), transparent 70%),
+      radial-gradient(52% 48% at 94% 90%, rgba(14, 144, 160, 0.20), transparent 72%),
+      #0A0E16;
+  }
+}
+
+/* Paired with .login-surface, never used alone. From the sm breakpoint up the
+   erosion effect supplies the ground, so the panel drops to the effect's own
+   near-black and the blue gradient underneath stops mattering. Below sm the
+   effect is not rendered at all - the form card has no background of its own
+   there, and dark form text on a black ground would be unreadable - so
+   .login-surface still shows through. */
+@media (min-width: 640px) {
+  .login-surface-night {
+    background: #0a0908;
+  }
 }
 
 /* The accent scale is deliberately not theme-swapped - it is the brand blue and
