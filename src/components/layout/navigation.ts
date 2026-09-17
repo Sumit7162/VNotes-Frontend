@@ -1,7 +1,7 @@
 import {
   FileText,
   GraduationCap,
-  LayoutDashboard,
+  Home,
   Settings,
   Star,
   Trash2,
@@ -35,7 +35,7 @@ export interface NavItem {
  * something real to open.
  */
 export const primaryNav: NavItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
+  { label: "Dashboard", icon: Home, to: "/dashboard" },
   { label: "Process New Video", icon: Upload, to: "/submit" },
   { label: "My Notes", icon: FileText, to: "/notes", matches: ["/notes"] },
   { label: "Quiz Dashboard", icon: GraduationCap, to: "/quiz", matches: ["/quiz"] },
