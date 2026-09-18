@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   CheckCircle,
   FileText,
+  Filter,
   Loader2,
   Lock,
   UploadCloud,
@@ -24,6 +25,25 @@ const MAX_TRANSCRIPT_CHARS = 2_000_000;
 const MIN_TRANSCRIPT_CHARS = 200;
 const ACCEPTED_EXTENSIONS = [".txt", ".text", ".md", ".srt", ".vtt"];
 
+// Matches the backend's column and its own cap on how many topics a filter may
+// name; past that it is a syllabus, not a filter.
+const MAX_FOCUS_CHARS = 500;
+const MAX_FOCUS_TOPICS = 10;
+
+/** Split a typed topic list the way the backend does, so the count shown here
+ *  is the count that will actually be sent to the model. */
+function splitTopics(raw: string): string[] {
+  const seen = new Set<string>();
+  const topics: string[] = [];
+  for (const piece of raw.split(/[,;\n]+/)) {
+    const topic = piece.trim().replace(/\s+/g, " ");
+    if (!topic || seen.has(topic.toLowerCase())) continue;
+    seen.add(topic.toLowerCase());
+    topics.push(topic);
+  }
+  return topics;
+}
+
 /** What the pipeline actually does, in order. Stated, not illustrated. */
 const steps = [
   "The transcript is cleaned up — caption timings and numbering are stripped.",
@@ -38,6 +58,9 @@ export function VideoSubmitPage() {
   const [url, setUrl] = useState("");
   const [transcript, setTranscript] = useState("");
   const [transcriptTitle, setTranscriptTitle] = useState("");
+  // Shared by both sources: a topic filter narrows the notes the same way
+  // whether the transcript was fetched for a link or uploaded.
+  const [focusTopics, setFocusTopics] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -107,9 +130,11 @@ export function VideoSubmitPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const focus = focusTopics.trim() || undefined;
+
     if (mode === "youtube") {
       if (!url.trim()) return;
-      processMutation.mutate({ youtube_url: url.trim() });
+      processMutation.mutate({ youtube_url: url.trim(), focus_topics: focus });
       return;
     }
 
@@ -124,8 +149,12 @@ export function VideoSubmitPage() {
     transcriptMutation.mutate({
       transcript: text,
       title: transcriptTitle.trim() || undefined,
+      focus_topics: focus,
     });
   };
+
+  const chosenTopics = splitTopics(focusTopics);
+  const tooManyTopics = chosenTopics.length > MAX_FOCUS_TOPICS;
 
   const transcriptChars = transcript.trim().length;
   const transcriptWords = transcript.trim() ? transcript.trim().split(/\s+/).length : 0;
@@ -158,7 +187,7 @@ export function VideoSubmitPage() {
           Back
         </Link>
         <p className="overline">New</p>
-        <h1 className="page-title mt-2 text-[32px] leading-[1.15] sm:text-[38px]">
+        <h1 className="page-title mt-2 text-[26px] leading-[1.15] sm:text-[38px]">
           Make notes
         </h1>
         <p className="mt-2.5 text-[15px] leading-relaxed text-ink-500">
@@ -291,7 +320,7 @@ export function VideoSubmitPage() {
                     setFileName(null);
                     setFileError(null);
                   }}
-                  className="w-full resize-y rounded-md bg-transparent px-3 py-3 font-mono text-[13px] leading-relaxed text-ink-900 outline-none placeholder:text-ink-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full resize-y rounded-md bg-transparent px-3 py-3 font-mono text-base leading-relaxed text-ink-900 outline-none placeholder:text-ink-400 disabled:cursor-not-allowed disabled:opacity-60 sm:text-[13px]"
                   disabled={transcriptMutation.isPending}
                 />
 
@@ -335,11 +364,54 @@ export function VideoSubmitPage() {
           </>
         )}
 
+        {/* ---- Topic filter ---------------------------------------------
+            Applies to both sources: name the topics and the notes cover only
+            what the video says about them, instead of its whole runtime. */}
+        <div className="rule pt-6">
+          <label htmlFor="focus-topics" className="overline mb-2 block">
+            Only these topics{" "}
+            <span className="normal-case tracking-normal text-ink-400">optional</span>
+          </label>
+          <input
+            id="focus-topics"
+            type="text"
+            placeholder="Backpropagation, dropout, Adam optimiser"
+            value={focusTopics}
+            onChange={(e) => setFocusTopics(e.target.value)}
+            maxLength={MAX_FOCUS_CHARS}
+            className="field"
+            disabled={activeMutation.isPending}
+          />
+          <p className="mt-2 text-xs leading-relaxed text-ink-400">
+            The notes then cover only what the video says about these topics — the
+            rest of it is skipped. Separate them with commas. Leave this empty for
+            notes on the whole video.
+          </p>
+          {chosenTopics.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              <Filter className="h-3.5 w-3.5 text-accent-600" aria-hidden="true" />
+              {chosenTopics.slice(0, MAX_FOCUS_TOPICS).map((topic) => (
+                <span
+                  key={topic.toLowerCase()}
+                  className="rounded-full bg-accent-50 px-2.5 py-1 text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-100"
+                >
+                  {topic}
+                </span>
+              ))}
+              {tooManyTopics && (
+                <span className="text-xs text-ink-400">
+                  only the first {MAX_FOCUS_TOPICS} are used
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="flex flex-wrap items-center gap-4">
           <button
             type="submit"
             disabled={!canSubmit || activeMutation.isPending}
-            className="btn-primary inline-flex h-10 items-center justify-center gap-2 rounded-md px-5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-primary inline-flex h-10 w-full items-center justify-center gap-2 rounded-md px-5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {activeMutation.isPending && (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

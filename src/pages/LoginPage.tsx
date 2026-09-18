@@ -1,7 +1,7 @@
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
 import { AuthUI, Button, Input, Label, PasswordInput } from "@/components/ui/auth-fuse";
 import RecursiveErosionBackground from "@/components/ui/recursive-erosion";
@@ -26,6 +26,33 @@ export function LoginPage() {
   // Set when login was refused only because the address is unverified, which
   // is the one case where offering to resend the link is useful.
   const [needsVerification, setNeedsVerification] = useState(false);
+
+  // Google renders its button as a fixed-width iframe and clamps the value
+  // it is given to 200-400px. Asking for 400 unconditionally made the
+  // button wider than a phone screen, so the sign-in card scrolled
+  // sideways and everything on it sat off centre. Measure the row the
+  // button lands in and ask for that instead.
+  const googleBoxRef = useRef<HTMLDivElement>(null);
+  const [googleWidth, setGoogleWidth] = useState(360);
+
+  useEffect(() => {
+    const box = googleBoxRef.current;
+    if (!box) return;
+
+    const measure = () => {
+      const next = Math.round(Math.min(400, Math.max(200, box.clientWidth)));
+      // Remounting the widget is what applies a new width, so ignore the
+      // sub-pixel jitter a resize observer reports while scrolling.
+      setGoogleWidth((previous) => (Math.abs(previous - next) > 4 ? next : previous));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
+    return () => observer.disconnect();
+    // Re-attaches when the button comes back after the "check your inbox"
+    // screen, where the slot - and so the element being measured - is gone.
+  }, [sentTo]);
 
   const switchMode = (next: Mode) => {
     setMode(next);
@@ -111,7 +138,8 @@ export function LoginPage() {
     <div className="grid gap-4 text-center">
       <MailCheck className="mx-auto h-10 w-10 text-primary" aria-hidden="true" />
       <p className="text-sm text-muted-foreground">
-        We sent a verification link to <span className="font-medium text-foreground">{sentTo}</span>.
+        We sent a verification link to{" "}
+        <span className="break-all font-medium text-foreground">{sentTo}</span>.
         Open it to activate your account — the link works for 24 hours.
       </p>
       <Button
@@ -192,7 +220,7 @@ export function LoginPage() {
         {submitLabel}
       </Button>
 
-      <div className="flex flex-wrap items-center justify-between gap-1 text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm text-muted-foreground">
         {mode === "signin" ? (
           <>
             <button
@@ -227,19 +255,20 @@ export function LoginPage() {
     <AuthUI
       hideAside
       mode={mode === "signup" ? "signup" : "signin"}
-      // Held back below `sm`, where the card drops its own background and dark
-      // form text would sit straight on the black ground. From sm up the card
-      // is 90% white, so the form reads cleanly over the effect.
+      // Held back below `sm`. The effect is a WebGL particle sphere in an
+      // iframe, and a phone should not be asked to run one behind a form it
+      // will be on for ten seconds; the panel's own gradient stands in.
       formBackgroundSlot={
         <div className="hidden h-full w-full sm:block">
           <RecursiveErosionBackground mode="dark" />
         </div>
       }
       formPanelClassName="login-surface login-surface-night"
-      // The card only gains its padding from sm up, where 520px minus p-8
-      // still clears the Google button. On a phone it drops the chrome and
-      // uses the full width instead of clipping.
-      formCardClassName="w-full max-w-[520px] sm:rounded-2xl sm:border sm:border-line sm:bg-paper-50/90 sm:p-8 sm:shadow-lg"
+      // The card keeps its surface at every width. It used to drop the
+      // background, border and padding below sm, which left the form and
+      // the "Or continue with" chip floating straight on the gradient with
+      // nothing lining them up. Only the padding and the cap change now.
+      formCardClassName="w-full max-w-[420px] rounded-2xl border border-line bg-paper-50 p-5 shadow-lg sm:max-w-[520px] sm:bg-paper-50/90 sm:p-8"
       title="Sign in to V-Notes AI"
       signUpTitle={mode === "forgot" ? "Reset your password" : "Create your account"}
       subtitle={
@@ -256,23 +285,28 @@ export function LoginPage() {
             alt=""
             width={56}
             height={56}
-            className="h-14 w-14 rounded-2xl ring-1 ring-border"
+            className="h-12 w-12 rounded-xl ring-1 ring-border sm:h-14 sm:w-14 sm:rounded-2xl"
           />
         </div>
       }
       emailFormSlot={emailForm}
       googleSlot={
         sentTo ? null : (
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setError("Google Sign-In was unsuccessful.")}
-            useOneTap
-            theme="filled_black"
-            shape="pill"
-            size="large"
-            text="continue_with"
-            width="400"
-          />
+          <div ref={googleBoxRef} className="flex w-full max-w-[400px] justify-center">
+            <GoogleLogin
+              // Keyed on the width because the widget only picks a new one
+              // up when it is rendered again.
+              key={googleWidth}
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Google Sign-In was unsuccessful.")}
+              useOneTap
+              theme="filled_black"
+              shape="pill"
+              size="large"
+              text="continue_with"
+              width={String(googleWidth)}
+            />
+          </div>
         )
       }
       footer={

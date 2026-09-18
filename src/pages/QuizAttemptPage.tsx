@@ -34,9 +34,9 @@ export function QuizAttemptPage() {
 
   if (isError || !attempt) {
     return (
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-3xl">
         {backLink}
-        <div className="rounded-xl border border-line bg-paper-50 p-12 text-center">
+        <div className="rounded-xl border border-line bg-paper-50 p-8 text-center sm:p-12">
           <AlertCircle className="mx-auto mb-4 h-12 w-12 text-ink-300" />
           <h3 className="mb-2 text-lg font-semibold text-ink-900">Attempt not found</h3>
           <p className="text-sm text-ink-500">
@@ -59,9 +59,9 @@ export function QuizAttemptPage() {
     <div className="mx-auto max-w-3xl">
       {backLink}
 
-      <div className="rounded-2xl border border-line bg-paper-50 p-6 shadow-sm sm:p-8">
+      <div className="rounded-2xl border border-line bg-paper-50 p-4 shadow-sm sm:p-6 lg:p-8">
         <div className="mb-6">
-          <h2 className="font-display text-xl font-semibold text-ink-900">
+          <h2 className="break-words font-display text-lg font-semibold text-ink-900 sm:text-xl">
             {attempt.title || "Quiz attempt"}
           </h2>
           <p className="mt-1 text-sm text-ink-500">Taken {formatDateTime(attempt.created_at)}</p>
@@ -93,7 +93,7 @@ export function QuizAttemptPage() {
             type="button"
             onClick={handleDelete}
             disabled={deleteAttempt.isPending}
-            className={`ml-auto inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors disabled:opacity-60 ${
+            className={`inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors disabled:opacity-60 sm:ml-auto ${
               confirmingDelete
                 ? "bg-danger-600 text-white hover:bg-danger-700"
                 : "text-ink-500 hover:text-danger-600"

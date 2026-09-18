@@ -115,7 +115,9 @@ const buttonVariants = cva(
         link: "text-foreground/70 underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-10 px-4 py-2",
+        // Taller on a phone: 40px is below the 44px a thumb reliably
+        // hits, and these are the only controls on the sign-in card.
+        default: "h-11 px-4 py-2 sm:h-10",
         sm: "h-9 rounded-md px-3",
         lg: "h-12 rounded-md px-6",
         icon: "h-8 w-8",
@@ -146,7 +148,11 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-lg border border-input dark:border-input/50 bg-background px-3 py-3 text-sm text-foreground shadow-sm shadow-black/5 transition-shadow placeholder:text-muted-foreground/70 focus-visible:bg-secondary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+          // 16px type below `sm` on purpose: iOS Safari zooms the whole
+          // page in when a focused field sets anything smaller, and the
+          // page never zooms back out - which is what threw the sign-in
+          // card off centre and left it scrolled sideways on a phone.
+          "flex h-11 w-full rounded-lg border border-input dark:border-input/50 bg-background px-3 py-3 text-base text-foreground shadow-sm shadow-black/5 transition-shadow placeholder:text-muted-foreground/70 focus-visible:bg-secondary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:h-10 sm:text-sm",
           className
         )}
         ref={ref}
@@ -304,7 +310,7 @@ export function AuthUI({
   return (
     <div
       className={cn(
-        "w-full min-h-screen bg-background",
+        "w-full min-h-dvh bg-background",
         !hideAside && "md:grid md:grid-cols-2",
       )}
     >
@@ -316,7 +322,7 @@ export function AuthUI({
       `}</style>
       <div
         className={cn(
-          "relative flex min-h-screen items-center justify-center p-6",
+          "relative flex min-h-dvh items-center justify-center px-4 py-8 sm:p-6",
           !hideAside && "md:min-h-0",
           formPanelClassName
         )}
@@ -339,7 +345,7 @@ export function AuthUI({
           {brand}
 
           <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+            <h1 className="text-balance font-display text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
               {isSignIn ? title : signUpTitle}
             </h1>
             <p className="text-balance text-sm text-muted-foreground">{subtitle}</p>
@@ -358,7 +364,9 @@ export function AuthUI({
             </div>
           ) : null}
 
-          <div className="flex justify-center">{googleSlot}</div>
+          {/* The provider widget renders a fixed-width iframe, so the row
+              has to be able to clip rather than push the card wider. */}
+          <div className="flex w-full min-w-0 justify-center overflow-hidden">{googleSlot}</div>
 
           {footer}
         </div>

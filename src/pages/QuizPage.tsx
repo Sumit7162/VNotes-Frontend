@@ -182,9 +182,9 @@ export function QuizPage() {
   // A quiz is built from notes, so without them there is nothing to ask about.
   if (video && video.status !== "completed") {
     return (
-      <div className="mx-auto max-w-3xl p-6">
+      <div className="mx-auto max-w-3xl">
         {backLink}
-        <div className="rounded-xl border border-line bg-paper-50 p-12 text-center">
+        <div className="rounded-xl border border-line bg-paper-50 p-8 text-center sm:p-12">
           <FileText className="mx-auto mb-4 h-12 w-12 text-ink-300" />
           <h3 className="mb-2 text-lg font-semibold text-ink-900">Notes are not ready yet</h3>
           <p className="text-sm text-ink-500">
@@ -201,7 +201,7 @@ export function QuizPage() {
       <div ref={topRef} className="mx-auto max-w-3xl">
         {backLink}
 
-        <div className="rounded-2xl border border-line bg-paper-50 p-6 shadow-sm sm:p-8">
+        <div className="rounded-2xl border border-line bg-paper-50 p-4 shadow-sm sm:p-6 lg:p-8">
           <QuizScore
             scorePercent={result.score_percent}
             correctCount={result.correct_count}
@@ -263,7 +263,7 @@ export function QuizPage() {
       <div ref={topRef} className="mx-auto max-w-3xl">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="truncate font-display text-xl font-semibold text-ink-900">
+            <h2 className="truncate font-display text-lg font-semibold text-ink-900 sm:text-xl">
               {quiz.title || "Quiz"}
             </h2>
             <p className="text-xs text-ink-500">
@@ -316,14 +316,16 @@ export function QuizPage() {
 
         <div
           ref={questionRef}
-          className="rounded-2xl border border-line bg-paper-50 p-6 shadow-sm sm:p-8"
+          className="rounded-2xl border border-line bg-paper-50 p-4 shadow-sm sm:p-6 lg:p-8"
         >
           {question.topic && (
             <span className="mb-3 inline-block rounded-full bg-accent-50 px-2.5 py-1 text-[11px] font-medium text-accent-700">
               {question.topic}
             </span>
           )}
-          <h3 className="text-lg font-medium leading-relaxed text-ink-900">{question.question}</h3>
+          <h3 className="text-base font-medium leading-relaxed text-ink-900 sm:text-lg">
+            {question.question}
+          </h3>
 
           <div className="mt-5 space-y-2.5">
             {question.options.map((option, index) => {
@@ -433,13 +435,13 @@ export function QuizPage() {
     <div ref={topRef} className="mx-auto max-w-3xl">
       {backLink}
 
-      <div className="rounded-2xl border border-line bg-paper-50 p-6 shadow-sm sm:p-8">
-        <div className="flex items-start gap-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-100">
+      <div className="rounded-2xl border border-line bg-paper-50 p-4 shadow-sm sm:p-6 lg:p-8">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-100 sm:h-11 sm:w-11">
             <Sparkles className="h-5 w-5 text-accent-600" />
           </span>
           <div className="min-w-0">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-ink-900">
+            <h2 className="font-display text-xl font-semibold tracking-tight text-ink-900 sm:text-2xl">
               Quiz yourself
             </h2>
             <p className="mt-1 text-sm text-ink-500">

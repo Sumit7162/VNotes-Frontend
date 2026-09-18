@@ -90,20 +90,23 @@ export function BackgroundPaths({
     );
 
     return (
-        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-white dark:bg-transparent">
+        <div className="relative min-h-dvh w-full flex items-center justify-center overflow-hidden bg-white dark:bg-transparent">
             <div className="absolute inset-0">
                 <FloatingPaths position={1} />
                 <FloatingPaths position={-1} />
             </div>
 
-            <div className="relative z-10 container mx-auto px-4 md:px-6 text-center">
+            {/* Vertical padding rather than pure centring: the page header and
+                the scroll cue are absolutely positioned over this, and on a
+                phone-sized viewport the title otherwise runs under both. */}
+            <div className="relative z-10 container mx-auto px-4 py-24 md:px-6 md:py-28 text-center">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 2 }}
                     className="max-w-4xl mx-auto"
                 >
-                    <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold mb-8 tracking-tighter">
+                    <h1 className="text-4xl sm:text-7xl md:text-8xl font-bold mb-8 tracking-tighter">
                         {words.map((word, wordIndex) => (
                             <span
                                 key={wordIndex}

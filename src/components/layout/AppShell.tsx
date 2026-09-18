@@ -33,7 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [isSidebarOpen]);
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-paper-100 text-ink-800 print:block print:h-auto print:overflow-visible">
+    <div className="flex h-dvh flex-col overflow-hidden bg-paper-100 text-ink-800 print:block print:h-auto print:overflow-visible">
       <TopBar onOpenSidebar={() => setIsSidebarOpen(true)} />
 
       <div className="flex min-h-0 flex-1 print:block">

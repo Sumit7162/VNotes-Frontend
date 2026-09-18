@@ -123,7 +123,7 @@ export function UserMenu() {
         <div
           role="menu"
           aria-label="Account"
-          className="absolute right-0 z-50 mt-2 w-72 origin-top-right animate-[menu-in_120ms_ease-out] overflow-hidden rounded-xl border border-line bg-paper-50 shadow-lg"
+          className="absolute right-0 z-50 mt-2 w-72 max-w-[calc(100vw-1.5rem)] origin-top-right animate-[menu-in_120ms_ease-out] overflow-hidden rounded-xl border border-line bg-paper-50 shadow-lg"
         >
           <div className="flex items-center gap-3 border-b border-line px-4 py-3.5">
             {avatar("md")}

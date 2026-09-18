@@ -109,9 +109,9 @@ export function GlobalSearch() {
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Search your videos, notes, or topics..."
+          placeholder="Search videos and notes..."
           aria-label="Search your videos and notes"
-          className="h-9 w-full rounded-lg border border-line bg-paper-100 pl-9 pr-16 text-sm text-ink-900 placeholder:text-ink-400 transition-colors focus:border-accent-300 focus:bg-paper-50 focus:outline-none focus:ring-2 focus:ring-accent-100"
+          className="h-10 w-full rounded-lg border border-line bg-paper-100 pl-9 pr-16 text-base text-ink-900 placeholder:text-ink-400 transition-colors focus:border-accent-300 focus:bg-paper-50 focus:outline-none focus:ring-2 focus:ring-accent-100 sm:h-9 sm:text-sm"
         />
         {term ? (
           <button

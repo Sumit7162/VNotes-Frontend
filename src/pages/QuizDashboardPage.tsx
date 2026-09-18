@@ -64,9 +64,9 @@ export function QuizDashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div>
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink-900">
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-ink-900 sm:text-3xl">
             Quiz Dashboard
           </h2>
           <p className="mt-1.5 text-sm text-ink-500">
@@ -75,7 +75,7 @@ export function QuizDashboardPage() {
         </div>
         <Link
           to="/notes"
-          className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-700 sm:w-auto"
         >
           <BookOpen className="h-4 w-4" />
           Pick notes to quiz
@@ -83,7 +83,7 @@ export function QuizDashboardPage() {
       </div>
 
       {!hasAttempts ? (
-        <div className="rounded-2xl border border-line bg-paper-50 p-12 text-center shadow-sm">
+        <div className="rounded-2xl border border-line bg-paper-50 p-8 text-center shadow-sm sm:p-12">
           <ClipboardList className="mx-auto mb-4 h-12 w-12 text-ink-300" />
           <h3 className="mb-2 text-lg font-semibold text-ink-900">No quizzes yet</h3>
           <p className="mx-auto mb-4 max-w-md text-sm text-ink-500">

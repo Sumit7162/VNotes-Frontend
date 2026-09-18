@@ -10,6 +10,7 @@ import {
   Clock,
   Download,
   AlertCircle,
+  Filter,
   GraduationCap,
   Loader2,
   Printer,
@@ -96,7 +97,7 @@ export function NotesViewerPage() {
     const isFailed = video.status === "failed";
 
     return (
-      <div className="p-6 max-w-3xl mx-auto">
+      <div className="mx-auto max-w-3xl">
         <Link
           to="/dashboard"
           className="inline-flex items-center gap-1 text-sm text-ink-500 hover:text-ink-700 mb-6"
@@ -104,7 +105,7 @@ export function NotesViewerPage() {
           <ArrowLeft className="h-4 w-4" />
           Back to Dashboard
         </Link>
-        <div className="bg-paper-50 rounded-xl border border-line p-8 text-center">
+        <div className="bg-paper-50 rounded-xl border border-line p-6 sm:p-8 text-center">
           {isFailed ? (
             <AlertCircle className="h-12 w-12 text-danger-600 mx-auto mb-4" />
           ) : (
@@ -129,7 +130,7 @@ export function NotesViewerPage() {
 
   if (!note || notesError) {
     return (
-      <div className="p-6 max-w-3xl mx-auto">
+      <div className="mx-auto max-w-3xl">
         <Link
           to="/dashboard"
           className="inline-flex items-center gap-1 text-sm text-ink-500 hover:text-ink-700 mb-6"
@@ -137,7 +138,7 @@ export function NotesViewerPage() {
           <ArrowLeft className="h-4 w-4" />
           Back to Dashboard
         </Link>
-        <div className="bg-paper-50 rounded-xl border border-line p-12 text-center">
+        <div className="bg-paper-50 rounded-xl border border-line p-8 sm:p-12 text-center">
           <FileText className="h-12 w-12 text-ink-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-ink-900 mb-2">No notes found</h3>
           <p className="text-sm text-ink-500">
@@ -149,7 +150,7 @@ export function NotesViewerPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto print:p-0">
+    <div className="mx-auto max-w-4xl print:p-0">
       <div className="mb-6 print:mb-4">
         <Link
           to="/dashboard"
@@ -159,20 +160,28 @@ export function NotesViewerPage() {
           Back to Dashboard
         </Link>
 
-        <div className="bg-paper-50 rounded-xl border border-line p-6 print:border-0 print:p-0">
+        <div className="bg-paper-50 rounded-xl border border-line p-4 sm:p-6 print:border-0 print:p-0">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h2 className="font-display text-xl font-semibold text-ink-900">
+            <div className="min-w-0">
+              <h2 className="break-words font-display text-lg font-semibold text-ink-900 sm:text-xl">
                 {video?.title || "Video Notes"}
               </h2>
-              <div className="flex items-center gap-4 mt-2 text-sm text-ink-500">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 text-sm text-ink-500">
                 <span className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
                   {formatDateTime(note.created_at)}
                 </span>
+                {/* These notes were deliberately partial; saying so keeps a
+                    reader from taking them for a record of the whole video. */}
+                {video?.focus_topics && (
+                  <span className="flex items-center gap-1">
+                    <Filter className="h-4 w-4" />
+                    Only {video.focus_topics}
+                  </span>
+                )}
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-4 print:hidden">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5 print:hidden">
               {/* The primary action on this page: turn what was just read into
                   a test of it. Filled, where the exports are quiet links. */}
               <Link
@@ -220,7 +229,7 @@ export function NotesViewerPage() {
         </div>
       </div>
 
-      <div className="bg-paper-50 rounded-xl border border-line p-8 print:border-0 print:p-0">
+      <div className="bg-paper-50 rounded-xl border border-line p-4 sm:p-6 lg:p-8 print:border-0 print:p-0">
         <NotesMarkdown content={note.markdown_content} />
 
         {/* Footer - the last thing on screen and on the last printed page. */}

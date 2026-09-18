@@ -163,17 +163,19 @@ export function NotesListPage() {
   return (
     <div className="mx-auto max-w-5xl">
       {/* ---- Masthead ---------------------------------------------------- */}
-      <header className="flex flex-wrap items-end justify-between gap-4 pb-7">
+      {/* Stacked on a phone, where wrapping left the button floating on its
+          own line under a left-aligned heading with nothing to align to. */}
+      <header className="flex flex-col gap-4 pb-7 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="overline">Library</p>
-          <h1 className="page-title mt-2 text-[32px] leading-[1.15] sm:text-[38px]">My Notes</h1>
+          <h1 className="page-title mt-2 text-[26px] leading-[1.15] sm:text-[38px]">My Notes</h1>
           <p className="mt-2.5 text-[15px] leading-relaxed text-ink-500">
             Everything written from your transcripts and videos.
           </p>
         </div>
         <Link
           to="/submit"
-          className="btn-primary inline-flex h-10 shrink-0 items-center gap-2 rounded-md px-4 text-sm font-semibold transition-colors"
+          className="btn-primary inline-flex h-10 w-full shrink-0 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold transition-colors sm:w-auto"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
           New notes
@@ -199,7 +201,7 @@ export function NotesListPage() {
         <>
           {/* ---- Toolbar ------------------------------------------------- */}
           <div className="rule flex flex-wrap items-center gap-3 pt-5">
-            <div className="relative min-w-0 flex-1 sm:max-w-xs">
+            <div className="relative w-full min-w-0 sm:max-w-xs sm:flex-1">
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"
                 aria-hidden="true"
@@ -210,7 +212,7 @@ export function NotesListPage() {
                 onChange={(event) => setTerm(event.target.value)}
                 placeholder="Search notes…"
                 aria-label="Search notes"
-                className="h-9 w-full rounded-md border border-line bg-paper-50 pl-9 pr-8 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-ink-600"
+                className="h-10 w-full rounded-md border border-line bg-paper-50 pl-9 pr-8 text-base text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-ink-600 sm:h-9 sm:text-sm"
               />
               {term && (
                 <button
@@ -224,13 +226,13 @@ export function NotesListPage() {
               )}
             </div>
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="flex w-full items-center justify-between gap-3 sm:ml-auto sm:w-auto sm:justify-end">
               <label className="flex items-center gap-2 text-xs text-ink-500">
                 <span className="hidden sm:inline">Sort by</span>
                 <select
                   value={sort}
                   onChange={(event) => setSort(event.target.value as SortKey)}
-                  className="h-9 rounded-md border border-line bg-paper-50 px-2.5 text-sm text-ink-900 outline-none transition-colors focus:border-ink-600"
+                  className="h-10 min-w-0 rounded-md border border-line bg-paper-50 px-2.5 text-base text-ink-900 outline-none transition-colors focus:border-ink-600 sm:h-9 sm:text-sm"
                 >
                   {sortOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -394,8 +396,10 @@ export function NotesListPage() {
                 {visible.length !== entries.length && ` (of ${entries.length} total)`}
               </p>
 
+              {/* Wraps: a library of a few hundred notes makes more page buttons
+                  than fit across a phone in a single row. */}
               {pageCount > 1 && (
-                <nav className="flex items-center gap-1" aria-label="Pages">
+                <nav className="flex flex-wrap items-center justify-end gap-1" aria-label="Pages">
                   <button
                     type="button"
                     onClick={() => setPage(current - 1)}

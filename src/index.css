@@ -112,6 +112,11 @@ html.dark {
 
 html {
   scroll-behavior: smooth;
+  /* Stops iOS and Android inflating type when the phone is turned to
+     landscape, which otherwise reflows a layout that was already laid
+     out correctly for the width. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* Jumping the viewport a whole screen is exactly the motion this preference is
@@ -316,15 +321,19 @@ html.dark .markdown-content a:hover {
 
 /* Form fields. One flat, hairline-bordered treatment; the focus state deepens
    the border and lifts the ground rather than painting a halo around it. */
+/* The 16px base size below `sm` is not a style choice: iOS Safari zooms
+   the whole page in when a field it focuses sets anything smaller, and
+   never zooms back out, which leaves every screen after that one
+   scrolled sideways and out of alignment. */
 .field {
-  @apply w-full rounded-md border border-line-strong bg-paper-50 px-3 py-2.5 text-sm text-ink-900 outline-none transition-colors;
+  @apply w-full rounded-md border border-line-strong bg-paper-50 px-3 py-2.5 text-base text-ink-900 outline-none transition-colors sm:text-sm;
   @apply placeholder:text-ink-400 focus:border-ink-600 disabled:cursor-not-allowed disabled:opacity-60;
 }
 
 /* A row in a list of records - notes, videos. Separated by rules rather than
    boxed, so a list of ten reads as one table instead of ten floating cards. */
 .record-row {
-  @apply flex items-start gap-4 border-t border-line py-4 transition-colors;
+  @apply flex items-start gap-3 border-t border-line py-4 transition-colors sm:gap-4;
 }
 
 /* Sidebar and menu rows. The active row is a tinted block rather than a border
@@ -378,18 +387,23 @@ html.dark .nav-row-active {
 .markdown-content {
   @apply text-ink-800;
   line-height: 1.75;
+  /* A bare URL or a long identifier in a set of notes is otherwise wider
+     than a phone, and one of them pushes the whole page sideways. */
+  overflow-wrap: break-word;
 }
-.markdown-content h1 { @apply font-display text-3xl font-semibold mb-4 mt-8 text-ink-900 tracking-tight; }
-.markdown-content h2 { @apply font-display text-2xl font-semibold mb-3 mt-7 text-ink-900 tracking-tight; }
-.markdown-content h3 { @apply font-display text-xl font-medium mb-2 mt-6 text-ink-900; }
-.markdown-content h4 { @apply font-display text-lg font-medium mb-2 mt-5 text-ink-900; }
+/* Headings step down a size on a phone: a 30px h1 over a 280px column
+   broke most note titles across three lines. */
+.markdown-content h1 { @apply font-display text-2xl sm:text-3xl font-semibold mb-4 mt-8 text-ink-900 tracking-tight; }
+.markdown-content h2 { @apply font-display text-xl sm:text-2xl font-semibold mb-3 mt-7 text-ink-900 tracking-tight; }
+.markdown-content h3 { @apply font-display text-lg sm:text-xl font-medium mb-2 mt-6 text-ink-900; }
+.markdown-content h4 { @apply font-display text-base sm:text-lg font-medium mb-2 mt-5 text-ink-900; }
 .markdown-content h5,
 .markdown-content h6 { @apply text-sm font-semibold uppercase tracking-wide mb-2 mt-4 text-ink-500; }
 .markdown-content h1:first-child,
 .markdown-content h2:first-child { @apply mt-0; }
 .markdown-content p { @apply mb-4 text-ink-700; }
-.markdown-content ul { @apply list-disc pl-6 mb-4 text-ink-700; }
-.markdown-content ol { @apply list-decimal pl-6 mb-4 text-ink-700; }
+.markdown-content ul { @apply list-disc pl-5 sm:pl-6 mb-4 text-ink-700; }
+.markdown-content ol { @apply list-decimal pl-5 sm:pl-6 mb-4 text-ink-700; }
 .markdown-content li { @apply mb-1.5 text-ink-700; }
 .markdown-content li::marker { color: #97A3B4; }
 .markdown-content strong { @apply font-semibold text-ink-900; }
@@ -402,7 +416,7 @@ html.dark .nav-row-active {
 .markdown-content ul ol,
 .markdown-content ol ul,
 .markdown-content ol ol { @apply mt-1.5 mb-1.5; }
-.markdown-content a { @apply text-accent-700 underline underline-offset-2 decoration-accent-200 hover:decoration-accent-700; }
+.markdown-content a { @apply break-words text-accent-700 underline underline-offset-2 decoration-accent-200 hover:decoration-accent-700; }
 .markdown-content img { @apply max-w-full h-auto rounded-lg my-4; }
 .markdown-content hr { @apply border-0 border-t border-line my-8; }
 
@@ -423,7 +437,7 @@ html.dark .nav-row-active {
 
 /* Task lists */
 .markdown-content li input[type="checkbox"] { @apply mr-2 align-middle accent-accent; }
-.markdown-content li.task-list-item { @apply list-none -ml-6; }
+.markdown-content li.task-list-item { @apply list-none -ml-5 sm:-ml-6; }
 
 /* Long formulas scroll rather than overflow the card */
 .markdown-content .katex-display { @apply overflow-x-auto overflow-y-hidden py-1; }

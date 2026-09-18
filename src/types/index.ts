@@ -33,6 +33,9 @@ export interface Video {
   youtube_url: string | null;
   source: VideoSource;
   title: string | null;
+  /** The topics the notes were narrowed to, comma-separated, or null for
+   *  notes on the whole video. */
+  focus_topics: string | null;
   duration_seconds: number | null;
   status: VideoStatus;
   error_message: string | null;
@@ -88,12 +91,16 @@ export interface UsageSummary {
 
 export interface VideoProcessRequest {
   youtube_url: string;
+  /** Comma-separated topics to limit the notes to; omit for the whole video. */
+  focus_topics?: string;
 }
 
 export interface TranscriptProcessRequest {
   /** Raw transcript text; .srt/.vtt scaffolding is stripped server-side. */
   transcript: string;
   title?: string;
+  /** Comma-separated topics to limit the notes to; omit for the whole transcript. */
+  focus_topics?: string;
 }
 
 // ---------------------------------------------------------------------------

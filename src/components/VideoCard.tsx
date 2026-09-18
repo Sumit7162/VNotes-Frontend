@@ -8,6 +8,7 @@ import {
   Loader2,
   Trash2,
   FileText,
+  Filter,
 } from "lucide-react";
 import type { Video as VideoType } from "../types";
 import { Link } from "react-router-dom";
@@ -173,6 +174,15 @@ export function VideoCard({ video }: VideoCardProps) {
                   {status.icon}
                   {status.label}
                 </span>
+                {video.focus_topics && (
+                  <span
+                    title={`Notes cover only: ${video.focus_topics}`}
+                    className="inline-flex max-w-full items-center gap-1.5 truncate rounded-full bg-accent-50 px-2.5 py-1 text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-100"
+                  >
+                    <Filter className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">{video.focus_topics}</span>
+                  </span>
+                )}
                 {duration && !thumbnail && (
                   <span className="text-xs text-ink-400">{duration}</span>
                 )}

@@ -27,7 +27,7 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
   useTheme();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper-100 px-5 py-10">
+    <div className="flex min-h-dvh items-center justify-center bg-paper-100 px-4 py-8 sm:px-5 sm:py-10">
       <div className="w-full max-w-[460px]">
         <Link to="/" className="inline-flex items-center gap-2.5">
           <img
@@ -44,7 +44,7 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
 
         <div className="mt-9">
           <p className="overline">Account</p>
-          <h1 className="page-title mt-2 text-[28px] leading-[1.2]">{title}</h1>
+          <h1 className="page-title mt-2 text-2xl leading-[1.2] sm:text-[28px]">{title}</h1>
           {subtitle && (
             <p className="mt-2 text-sm leading-relaxed text-ink-500">{subtitle}</p>
           )}

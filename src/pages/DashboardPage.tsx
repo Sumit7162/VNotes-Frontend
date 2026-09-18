@@ -111,9 +111,9 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between gap-6">
+      <header className="flex items-start justify-between gap-4 sm:gap-6">
         <div className="min-w-0">
-          <h1 className="page-title text-2xl sm:text-3xl">
+          <h1 className="page-title text-xl sm:text-3xl">
             Welcome back, {displayName} <span aria-hidden="true">👋</span>
           </h1>
           <p className="mt-1 text-sm text-ink-500">
@@ -165,7 +165,7 @@ export function DashboardPage() {
                       disabled
                       aria-label={YOUTUBE_LOCK_SHORT}
                       placeholder={YOUTUBE_LOCK_SHORT}
-                      className="h-11 w-full cursor-not-allowed rounded-lg border border-white/15 bg-night-900/25 pl-10 pr-3.5 text-sm text-white/50 placeholder:text-white/40"
+                      className="h-11 w-full cursor-not-allowed rounded-lg border border-white/15 bg-night-900/25 pl-10 pr-3.5 text-base text-white/50 placeholder:text-white/40 sm:text-sm"
                     />
                   </div>
                   <Link
@@ -196,7 +196,7 @@ export function DashboardPage() {
                     onChange={(event) => setUrl(event.target.value)}
                     disabled={youtube.isPending}
                     placeholder="Paste YouTube video URL here..."
-                    className="h-11 min-w-0 flex-1 rounded-lg border border-white/20 bg-night-900/35 px-3.5 text-sm text-white placeholder:text-white/45 transition-colors focus:border-white/45 focus:outline-none focus:ring-2 focus:ring-white/25 disabled:opacity-60"
+                    className="h-11 min-w-0 flex-1 rounded-lg border border-white/20 bg-night-900/35 px-3.5 text-base text-white placeholder:text-white/45 transition-colors focus:border-white/45 focus:outline-none focus:ring-2 focus:ring-white/25 disabled:opacity-60 sm:text-sm"
                   />
                   <button
                     type="submit"
@@ -273,7 +273,10 @@ export function DashboardPage() {
       {/* ---- Quick features --------------------------------------------- */}
       <section
         aria-label="What V-Notes AI does"
-        className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+        // One column on a phone. Two put the icon, title and body into
+        // roughly 90px of text column, which wrapped every label onto
+        // three or four lines and left the row ragged.
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
       >
         {highlights.map((item) => {
           const Icon = item.icon;

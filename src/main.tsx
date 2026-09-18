@@ -22,7 +22,7 @@ function Root() {
     return (
       <React.StrictMode>
         <QueryClientProvider client={queryClient}>
-          <div className="min-h-screen flex items-center justify-center bg-paper-100 px-4">
+          <div className="min-h-dvh flex items-center justify-center bg-paper-100 px-4">
             <div className="text-center max-w-md p-8 rounded-3xl border border-line bg-paper-50 shadow-lg">
               <h1 className="font-display text-2xl font-semibold text-ink-900 tracking-tight mb-4">V-Notes AI</h1>
               <p className="text-ink-600 mb-4">

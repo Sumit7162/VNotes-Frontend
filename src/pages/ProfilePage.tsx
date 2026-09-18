@@ -18,7 +18,7 @@ export function ProfilePage() {
   const avatarUrl = dbUser?.avatar_url;
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="mx-auto max-w-2xl">
       <div className="mb-6">
         <Link
           to="/dashboard"
@@ -31,38 +31,38 @@ export function ProfilePage() {
         <p className="text-sm text-ink-500 mt-1">Your account information</p>
       </div>
 
-      <div className="bg-paper-50 rounded-xl border border-line p-6 space-y-6">
+      <div className="bg-paper-50 rounded-xl border border-line p-5 sm:p-6 space-y-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-accent-50 rounded-full flex items-center justify-center overflow-hidden">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 bg-accent-50 rounded-full flex items-center justify-center overflow-hidden">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
                 alt={displayName}
-                className="w-16 h-16 rounded-full object-cover"
+                className="w-full h-full rounded-full object-cover"
               />
             ) : (
               <User className="h-8 w-8 text-accent" />
             )}
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-ink-900">
+          <div className="min-w-0">
+            <h3 className="truncate text-lg font-semibold text-ink-900">
               {displayName}
             </h3>
-            <p className="text-sm text-ink-500">{displayEmail}</p>
+            <p className="break-all text-sm text-ink-500">{displayEmail}</p>
           </div>
         </div>
 
         <div className="border-t border-line pt-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <Mail className="h-5 w-5 text-ink-400" />
-            <div>
+          <div className="flex items-start gap-3">
+            <Mail className="mt-0.5 h-5 w-5 shrink-0 text-ink-400" />
+            <div className="min-w-0">
               <p className="text-xs text-ink-500">Email</p>
-              <p className="text-sm font-medium text-ink-900">{displayEmail}</p>
+              <p className="break-all text-sm font-medium text-ink-900">{displayEmail}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Calendar className="h-5 w-5 text-ink-400" />
+          <div className="flex items-start gap-3">
+            <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-ink-400" />
             <div>
               <p className="text-xs text-ink-500">Member Since</p>
               <p className="text-sm font-medium text-ink-900">
@@ -79,9 +79,9 @@ export function ProfilePage() {
         </div>
       </div>
 
-      <div className="mt-6 bg-paper-50 rounded-xl border border-line p-6">
+      <div className="mt-6 bg-paper-50 rounded-xl border border-line p-5 sm:p-6">
         <h3 className="text-lg font-semibold text-ink-900 mb-4">Usage Statistics</h3>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
           <div>
             <p className="text-xs text-ink-500 mb-1">Total Videos Processed</p>
             <p className="text-2xl font-semibold text-ink-900 tabular-nums">
